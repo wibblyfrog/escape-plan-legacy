@@ -6,20 +6,18 @@
       "command": "cmake --build build",
       "args": [],
       "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
+      "group": "build"
     },
     {
       "type": "shell",
       "label": "make desktop",
-      "command": "cmake -S . -B build",
-      "args": [
-        "-G \"MinGW Makefiles\""
-      ],
+      "command": "cmake -S . -B build -G \"MinGW Makefiles\"",
+      "args": [],
       "problemMatcher": [],
-      "group": "build"
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     },
     {
       "type": "shell",

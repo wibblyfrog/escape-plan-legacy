@@ -7,29 +7,52 @@ Texture2D spritesheet;
 World world;
 Player player;
 
+Vector2 mouse_pos;
+
 static void Load() {
   camera = Camera2D{};
   camera.offset = Vector2{GAME_WIDTH / 2, GAME_HEIGHT / 2};
   spritesheet = LoadTexture("resources/spritesheet.png");
+  SetTextureFilter(spritesheet, TEXTURE_FILTER_POINT);
   world = World();
 
   player = Player();
+  //* Place player in the center of the world, removing any rocks that are there
+  player.pos = Vector2{float(world.GetCenter().x) * CELL_SIZE,
+                       float(world.GetCenter().y * CELL_SIZE)};
+  if (world.GetTile(world.GetCenter().x, world.GetCenter().y)->isRock) {
+    world.SetTile(world.GetCenter().x, world.GetCenter().y, Tile(3, false, 0));
+  }
 }
 
 static void Update(float dt) {
-  // Maintain vertical size
+  //* Maintain vertical size
   camera.offset = Vector2{(SCREEN_WIDTH / 2) + (CELL_SIZE / 2),
                           (SCREEN_HEIGHT / 2) + (CELL_SIZE / 2)};
   camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
-
-  player.Update(dt);
+  player.Update(&world, dt);
   camera.target = player.pos;
+
+  mouse_pos = GetScreenToWorld2D(GetMousePosition(), camera);
+
+  // Do damage to clicked rocks
+  Vector2i mouse_world_pos =
+      Vector2i{int(mouse_pos.x / CELL_SIZE), int(mouse_pos.y / CELL_SIZE)};
+  if (world.GetTile(mouse_world_pos.x, mouse_world_pos.y)->isRock &&
+      IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    world.DamageTile(mouse_world_pos.x, mouse_world_pos.y, 1);
+  }
 }
 
 static void Draw() {
   BeginMode2D(camera);
-  world.DrawMap(spritesheet, Rectangle{0, 0, GAME_WIDTH, GAME_HEIGHT});
+  world.DrawMap(spritesheet, Rectangle{camera.target.x - (GAME_WIDTH / 2),
+                                       camera.target.y - (GAME_HEIGHT / 2),
+                                       GAME_WIDTH, GAME_HEIGHT});
   player.Draw(spritesheet);
+  DrawRectangleLinesEx(Rectangle{mouse_pos.x * CELL_SIZE,
+                                 mouse_pos.y * CELL_SIZE, CELL_SIZE, CELL_SIZE},
+                       0.5f, YELLOW);
   EndMode2D();
   DrawFPS(0, 0);
 }
