@@ -1,11 +1,11 @@
 #include "common.h"
 #include "player.h"
-#include "utils.h"
 #include "world.h"
 
 Camera2D camera;
 Texture2D spritesheet;
 World world;
+Player player;
 
 static void Load() {
   camera = Camera2D{};
@@ -18,7 +18,8 @@ static void Load() {
 
 static void Update(float dt) {
   // Maintain vertical size
-  camera.offset = Vector2{GAME_WIDTH / 2, GAME_HEIGHT / 2};
+  camera.offset = Vector2{(SCREEN_WIDTH / 2) + (CELL_SIZE / 2),
+                          (SCREEN_HEIGHT / 2) + (CELL_SIZE / 2)};
   camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
 
   player.Update(dt);
@@ -27,8 +28,8 @@ static void Update(float dt) {
 
 static void Draw() {
   BeginMode2D(camera);
-  world.DrawMap(Rectangle{0, 0, GAME_WIDTH, GAME_HEIGHT});
-  player.Draw();
+  world.DrawMap(spritesheet, Rectangle{0, 0, GAME_WIDTH, GAME_HEIGHT});
+  player.Draw(spritesheet);
   EndMode2D();
   DrawFPS(0, 0);
 }

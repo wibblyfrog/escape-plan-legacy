@@ -1,14 +1,14 @@
 #pragma once
 
-#include "common.h"
+#include <raylib.h>
+
 #include "utils.h"
 
 struct Player {
   Vector2 pos;
-  Vector2i grid_pos;
   Vector2 vel;
-  float speed;
+  float speed = 25;
 
   void Update(float dt);
-  void Draw();
+  void Draw(Texture2D spritesheet);
 };

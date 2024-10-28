@@ -3,6 +3,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
+// #include "player.h"
+// #include "world.h"
+
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
 #endif
@@ -17,7 +20,7 @@ const int SPRITESHEET_WIDTH = 8;
 const int SPRITESHEET_HEIGHT = 8;
 const int CELL_SIZE = 8;
 
-extern Camera2D camera;
-extern Texture2D spritesheet;
-extern Player player;
-extern World world;
+// extern Camera2D camera;
+// extern Texture2D spritesheet;
+// extern World world;
+// extern Player player;

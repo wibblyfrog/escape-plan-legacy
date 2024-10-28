@@ -27,5 +27,5 @@ struct World {
 
   bool CheckCollision(int x, int y);
 
-  void DrawMap(Rectangle region);
+  void DrawMap(Texture2D spritesheet, Rectangle region);
 };

@@ -20,8 +20,13 @@ Keyboard:
  - $(Game Control 03)
 
 ### TO-DO
-- [ ] Create procedural map full of rocks
-- [ ] Allow the rocks to be destroyed for carbon
+- [X] Create procedural map full of rocks
+- [ ] Add Player
+  - [ ] Map collisions
+  - [ ] Animations
+  - [ ] Break rocks
+  - [ ] HP and Ammo
+  - [ ] Shoot gun
 - [ ] Crafting system for O2 tethers, ammunition, and suit patches
 - [ ] Placing/picking up tethers
 - [ ] Bug AI

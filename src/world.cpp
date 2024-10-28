@@ -21,7 +21,7 @@ void World::SetTile(int idx, Tile tile) { tiles[idx] = tile; }
 
 bool World::CheckCollision(int x, int y) {}
 
-void World::DrawMap(Rectangle region) {
+void World::DrawMap(Texture2D spritesheet, Rectangle region) {
   for (int idx = 0; idx < WORLD_WIDTH * WORLD_HEIGHT; idx++) {
     Vector2 pos = {
         IndexToVector2(idx).x * CELL_SIZE,
@@ -29,7 +29,7 @@ void World::DrawMap(Rectangle region) {
     };
     if (CheckCollisionRecs(Rectangle{pos.x, pos.y, CELL_SIZE, CELL_SIZE},
                            region)) {
-      DrawSprite(tiles[idx].index, pos);
+      DrawSprite(spritesheet, tiles[idx].index, pos);
     }
   }
 }
