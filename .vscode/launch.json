@@ -31,7 +31,7 @@
       "name": "(node) Launch",
       "type": "node",
       "request": "launch",
-      "program": "build/rayjam/rayjam.js",
+      "program": "build/rayjam/rayjam.html",
     }
   ]
 }
