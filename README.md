@@ -21,10 +21,10 @@ Keyboard:
 
 ### TO-DO
 - [X] Create procedural map full of rocks
-- [ ] Add Player
-  - [ ] Map collisions
+- [X] Add Player
+  - [X] Map collisions
   - [ ] Animations
-  - [ ] Break rocks
+  - [X] Break rocks
   - [ ] HP and Ammo
   - [ ] Shoot gun
 - [ ] Crafting system for O2 tethers, ammunition, and suit patches

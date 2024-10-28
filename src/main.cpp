@@ -21,7 +21,8 @@ static void Load() {
   player.pos = Vector2{float(world.GetCenter().x) * CELL_SIZE,
                        float(world.GetCenter().y * CELL_SIZE)};
   if (world.GetTile(world.GetCenter().x, world.GetCenter().y)->isRock) {
-    world.SetTile(world.GetCenter().x, world.GetCenter().y, Tile(3, false, 0));
+    world.SetTile(world.GetCenter().x, world.GetCenter().y,
+                  Tile(4, false, 0, false));
   }
 }
 
