@@ -1,17 +1,23 @@
+#include <vector>
+
 #include "common.h"
+#include "item.h"
 #include "player.h"
 #include "world.h"
 
 Camera2D camera;
+Camera2D ui_camera;
 Texture2D spritesheet;
 World world;
 Player player;
-
 Vector2 mouse_pos;
 
 static void Load() {
   camera = Camera2D{};
   camera.offset = Vector2{GAME_WIDTH / 2, GAME_HEIGHT / 2};
+
+  ui_camera = Camera2D{};
+
   spritesheet = LoadTexture("resources/spritesheet.png");
   SetTextureFilter(spritesheet, TEXTURE_FILTER_POINT);
   world = World();
@@ -20,19 +26,27 @@ static void Load() {
   //* Place player in the center of the world, removing any rocks that are there
   player.pos = Vector2{float(world.GetCenter().x) * CELL_SIZE,
                        float(world.GetCenter().y * CELL_SIZE)};
-  if (world.GetTile(world.GetCenter().x, world.GetCenter().y)->isRock) {
-    world.SetTile(world.GetCenter().x, world.GetCenter().y,
-                  Tile(4, false, 0, false));
-  }
 }
 
 static void Update(float dt) {
   //* Maintain vertical size
-  camera.offset = Vector2{(SCREEN_WIDTH / 2) + (CELL_SIZE / 2),
-                          (SCREEN_HEIGHT / 2) + (CELL_SIZE / 2)};
+  camera.offset = Vector2{(SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2)};
   camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
+  ui_camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
   player.Update(&world, dt);
-  camera.target = player.pos;
+
+  for (auto it = world.items.begin(); it != world.items.end();) {
+    (*it).Update(dt, player.pos);
+
+    if (CheckCollisionCircles((*it).pos, 2, player.pos, 2)) {
+      it = world.items.erase(it);
+      player.carbon++;
+    } else {
+      ++it;
+    }
+  }
+
+  camera.target = Vector2Add(player.pos, Vector2(4, 4));
 
   mouse_pos = GetScreenToWorld2D(GetMousePosition(), camera);
 
@@ -51,9 +65,12 @@ static void Draw() {
                                        camera.target.y - (GAME_HEIGHT / 2),
                                        GAME_WIDTH, GAME_HEIGHT});
   player.Draw(spritesheet);
-  DrawRectangleLinesEx(Rectangle{mouse_pos.x * CELL_SIZE,
-                                 mouse_pos.y * CELL_SIZE, CELL_SIZE, CELL_SIZE},
-                       0.5f, YELLOW);
+  EndMode2D();
+
+  BeginMode2D(ui_camera);
+  DrawCircle(0, GAME_HEIGHT, 17, WHITE);
+  DrawCircle(0, GAME_HEIGHT, 16, BLACK);
+  DrawText(TextFormat("%i", player.carbon), 2, GAME_HEIGHT - 10, 8, WHITE);
   EndMode2D();
   DrawFPS(0, 0);
 }
@@ -70,6 +87,7 @@ static void UpdateDrawFrame() {
 
 int main(void) {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib game template");
+  SetTraceLogLevel(LOG_ALL);
   Load();
 
 #if defined(PLATFORM_WEB)

@@ -15,4 +15,7 @@ void Player::Update(World* world, float dt) {
     pos.x += 1;
 }
 
-void Player::Draw(Texture2D spritesheet) { DrawSprite(spritesheet, 0, pos); }
+void Player::Draw(Texture2D spritesheet) {
+  DrawSprite(spritesheet, 0, pos, 1.0);
+  // DrawText("@", int(pos.x), int(pos.y), CELL_SIZE, YELLOW);
+}

@@ -13,6 +13,7 @@ World::World() {
       tiles[idx] = Tile(4, true, 0, false);
     }
   }
+  SetTile(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, Tile(5, false, 0, false));
 }
 World::~World() {}
 
@@ -31,8 +32,9 @@ void World::DamageTile(int x, int y, int amount) {
     tile->index -= 1;
   }
 
-  if (tile->health <= 0) {
+  if (tile->health <= 0 && tile->isRock) {
     tiles[CoordToIndex(x, y)] = Tile(5, false, 0, false);
+    items.push_back(Item(Vector2{float(x) * CELL_SIZE, float(y) * CELL_SIZE}));
   }
 }
 
@@ -54,7 +56,10 @@ void World::DrawMap(Texture2D spritesheet, Rectangle region) {
     // just check only the tiles in the region
     if (CheckCollisionRecs(Rectangle{pos.x, pos.y, CELL_SIZE, CELL_SIZE},
                            region)) {
-      DrawSprite(spritesheet, tiles[idx].index, pos);
+      DrawSprite(spritesheet, tiles[idx].index, pos, 1.0f);
     }
+  }
+  for (auto item : items) {
+    item.Draw(spritesheet);
   }
 }

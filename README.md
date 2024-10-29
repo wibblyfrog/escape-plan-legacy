@@ -25,6 +25,8 @@ Keyboard:
   - [X] Map collisions
   - [ ] Animations
   - [X] Break rocks
+    - [ ] Adjust rock breaking to be a hold action rather than a single click
+  - [X] Rocks drop carbon, which can be collected by player
   - [ ] HP and Ammo
   - [ ] Shoot gun
 - [ ] Crafting system for O2 tethers, ammunition, and suit patches

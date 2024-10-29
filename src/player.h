@@ -9,6 +9,7 @@ struct Player {
   Vector2 pos;
   Vector2 vel;
   float speed = 25;
+  int carbon = 0;
 
   void Update(World* world, float dt);
   void Draw(Texture2D spritesheet);

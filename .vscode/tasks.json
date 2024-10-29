@@ -6,7 +6,10 @@
       "command": "cmake --build build",
       "args": [],
       "problemMatcher": [],
-      "group": "build"
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     },
     {
       "type": "shell",
@@ -14,10 +17,7 @@
       "command": "cmake -S . -B build -G \"MinGW Makefiles\"",
       "args": [],
       "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
+      "group": "build"
     },
     {
       "type": "shell",
@@ -28,7 +28,8 @@
         "-DPLATFORM=Web",
         "-DCMAKE_TOOLCHAIN_FILE=C:/Apps/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
       ],
-      "problemMatcher": []
+      "problemMatcher": [],
+      "group": "build"
     }
   ],
   "version": "2.0.0"

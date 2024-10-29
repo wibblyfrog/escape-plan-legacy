@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "common.h"
+#include "item.h"
 #include "utils.h"
 
 struct Tile {
@@ -18,11 +19,12 @@ struct Tile {
 
 struct World {
   std::vector<Tile> tiles;
+  std::vector<Item> items;
 
   World();
   ~World();
 
-  Tile *GetTile(int x, int y);
+  Tile* GetTile(int x, int y);
   void SetTile(int x, int y, Tile tile);
   void SetTile(int idx, Tile tile);
 
