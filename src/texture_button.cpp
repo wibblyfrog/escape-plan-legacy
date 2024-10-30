@@ -10,5 +10,11 @@ bool TextureButton(Texture spritesheet, int index, Rectangle bounds,
              Color{255, 255, 255, alpha});
   DrawRectangleLinesEx(bounds, 2.0f, LIGHTGRAY);
   DrawText(text, bounds.x, bounds.y + bounds.height, 8, Color{0, 0, 0, alpha});
+
+  if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+      return true;
+    }
+  }
   return false;
 }

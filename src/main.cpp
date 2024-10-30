@@ -105,22 +105,24 @@ static void Draw() {
   // DrawText(TextFormat("%i", player.carbon), 2, GAME_HEIGHT - 10, 8, WHITE);
   EndMode2D();
 
-  GuiPanel(Rectangle{0, 0, 128, 52}, "Status");
+  GuiPanel(Rectangle{0, 0, 128, 66}, "Status");
   GuiLabel(Rectangle{0, 14, 128, 32},
            TextFormat("Suit Damage: %i", 100.0f - player.hp / player.max_hp));
   GuiLabel(Rectangle{0, 28, 128, 32}, TextFormat("Carbon: %i", player.carbon));
+  GuiLabel(Rectangle{0, 42, 128, 32},
+           TextFormat("Tethers: %i", player.tethers));
 
   if (pod.showInfoPanel) {
-    GuiPanel(Rectangle{0, 56, 128, 72}, "Drop Pod");
-    GuiLabel(Rectangle{0, 80, 128, 14},
+    GuiPanel(Rectangle{0, 70, 128, 72}, "Drop Pod");
+    GuiLabel(Rectangle{0, 100, 128, 14},
              TextFormat("Shuttle Arrival: %i", pod.days_left));
-    GuiLabel(Rectangle{0, 94, 128, 14},
+    GuiLabel(Rectangle{0, 116, 128, 14},
              TextFormat("Stored Carbon: %i", pod.carbon));
-    if (GuiButton(Rectangle{0, 118, 48, 20}, "Craft")) {
+    if (GuiButton(Rectangle{0, 132, 48, 20}, "Craft")) {
       pod.showCraftingPanel = true;
     }
 
-    if (GuiButton(Rectangle{50, 118, 48, 20}, "Deposit Carbon")) {
+    if (GuiButton(Rectangle{50, 132, 48, 20}, "Deposit Carbon")) {
       pod.carbon += player.carbon;
       player.carbon = 0;
     }
@@ -131,7 +133,12 @@ static void Draw() {
                                  SCREEN_HEIGHT / 2},
                        "Crafting");
 
-      if (TextureButton(spritesheet, 12, Rectangle{0, 248, 32, 32}, "Tether")) {
+      if (TextureButton(spritesheet, 12, Rectangle{0, 248, 32, 32},
+                        "Tether (x20)")) {
+        if (pod.carbon >= 10) {
+          pod.carbon -= 10;
+          player.tethers += 1;
+        }
       }
 
       if (result > 0) {
@@ -153,7 +160,7 @@ static void UpdateDrawFrame() {
 }
 
 int main(void) {
-  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib game template");
+  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Escape Plan");
   SetTraceLogLevel(LOG_ALL);
   Load();
 

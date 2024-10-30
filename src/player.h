@@ -16,7 +16,9 @@ struct Player {
   int max_oxygen = 10;
 
   int carbon = 0;
-  int max_carbon = 10;
+  int max_carbon = 20;
+
+  int tethers = 0;
 
   int break_dist = 14;
   float break_timer;
