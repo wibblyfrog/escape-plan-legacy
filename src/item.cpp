@@ -1,7 +1,8 @@
 #include "item.h"
 
 void Item::Update(float dt, Vector2 target) {
-  pos = Vector2Lerp(pos, target, 1.25 * dt);
+  pos.x += (target.x - pos.x) * 8 * dt;
+  pos.y += (target.y - pos.y) * 8 * dt;
 }
 
 void Item::Draw(Texture spritesheet) {

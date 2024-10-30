@@ -5,6 +5,9 @@
 #include "player.h"
 #include "world.h"
 
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
+
 Camera2D camera;
 Camera2D ui_camera;
 Texture2D spritesheet;
@@ -51,11 +54,17 @@ static void Update(float dt) {
   mouse_pos = GetScreenToWorld2D(GetMousePosition(), camera);
 
   // Do damage to clicked rocks
-  Vector2i mouse_world_pos =
-      Vector2i{int(mouse_pos.x / CELL_SIZE), int(mouse_pos.y / CELL_SIZE)};
+  Vector2 mouse_world_pos = Vector2{float(int(mouse_pos.x / CELL_SIZE)),
+                                    float(int(mouse_pos.y / CELL_SIZE))};
   if (world.GetTile(mouse_world_pos.x, mouse_world_pos.y)->isRock &&
-      IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-    world.DamageTile(mouse_world_pos.x, mouse_world_pos.y, 1);
+      IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
+      Vector2Distance(
+          Vector2{mouse_world_pos.x * CELL_SIZE, mouse_world_pos.y * CELL_SIZE},
+          player.pos) <= player.break_dist) {
+    if (player.break_timer <= 0) {
+      world.DamageTile(mouse_world_pos.x, mouse_world_pos.y, 1);
+      player.break_timer = player.break_time;
+    }
   }
 }
 
@@ -65,15 +74,32 @@ static void Draw() {
                                        camera.target.y - (GAME_HEIGHT / 2),
                                        GAME_WIDTH, GAME_HEIGHT});
   player.Draw(spritesheet);
+
+  // mouse_pos = GetScreenToWorld2D(GetMousePosition(), camera);
+  // Rectangle mouse_world_pos = Rectangle{
+  //     float(int(mouse_pos.x / CELL_SIZE) * CELL_SIZE),
+  //     float(int(mouse_pos.y / CELL_SIZE) * CELL_SIZE), CELL_SIZE, CELL_SIZE};
+  // if (Vector2Distance(Vector2{mouse_world_pos.x, mouse_world_pos.y},
+  //                     player.pos) <= 12) {
+  //   DrawRectangleLinesEx(mouse_world_pos, 0.5, YELLOW);
+  // } else {
+  //   DrawRectangleLinesEx(mouse_world_pos, 0.5, RED);
+  // }
+
   EndMode2D();
 
   BeginMode2D(ui_camera);
-  DrawCircle(0, GAME_HEIGHT, 17, WHITE);
-  DrawCircle(0, GAME_HEIGHT, 16, BLACK);
-  DrawText(TextFormat("%i", player.carbon), 2, GAME_HEIGHT - 10, 8, WHITE);
+  // DrawCircle(0, GAME_HEIGHT, 17, WHITE);
+  // DrawCircle(0, GAME_HEIGHT, 16, BLACK);
+  // DrawText(TextFormat("%i", player.carbon), 2, GAME_HEIGHT - 10, 8, WHITE);
   EndMode2D();
-  DrawFPS(0, 0);
+
+  GuiPanel(Rectangle{0, 0, 128, 96}, "Debug Info");
+  GuiLabel(Rectangle{0, 14, 128, 32},
+           TextFormat("Break Timer: %f", player.break_timer));
+  GuiLabel(Rectangle{0, 28, 128, 32}, TextFormat("Carbon: %i", player.carbon));
 }
+
 static void Unload() { UnloadTexture(spritesheet); }
 
 static void UpdateDrawFrame() {

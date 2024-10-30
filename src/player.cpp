@@ -1,6 +1,10 @@
 #include "player.h"
 
 void Player::Update(World* world, float dt) {
+  if (break_timer > 0) {
+    break_timer -= dt;
+  }
+
   if (IsKeyDown(KEY_W) && !world->IsSolid(pos.x, pos.y - 1) &&
       !world->IsSolid(pos.x + 7, pos.y - 1))
     pos.y -= 1;
