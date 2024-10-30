@@ -1,19 +1,27 @@
 #pragma once
 
 #include "common.h"
+#include "raygui.h"
 #include "utils.h"
 
 enum ItemTypes { TETHER, PATCH, AMMO };
 
 struct Droppod {
  public:
-  Rectangle bounds = Rectangle{0, 0, 24, 8};
+  Vector2 pos;
+  Rectangle bounds;
 
-  Droppod();
-  ~Droppod();
+  int carbon = 0;
+  int days_left = 15;
+
+  bool showInfoPanel = false;
+  bool showCraftingPanel = false;
+
+  Vector2 GetCenter() {
+    return Vector2{pos.x + (bounds.width / 2), pos.y + (bounds.height / 2)};
+  }
 
   void CraftItem();
 
-  void Update();
-  void Draw();
+  void Draw(Texture spritesheet);
 };

@@ -1,8 +1,10 @@
 #include <vector>
 
 #include "common.h"
+#include "droppod.h"
 #include "item.h"
 #include "player.h"
+#include "texture_button.h"
 #include "world.h"
 
 #define RAYGUI_IMPLEMENTATION
@@ -13,6 +15,7 @@ Camera2D ui_camera;
 Texture2D spritesheet;
 World world;
 Player player;
+Droppod pod;
 Vector2 mouse_pos;
 
 static void Load() {
@@ -26,9 +29,12 @@ static void Load() {
   world = World();
 
   player = Player();
-  //* Place player in the center of the world, removing any rocks that are there
+  //* Place player in the center of the world
   player.pos = Vector2{float(world.GetCenter().x) * CELL_SIZE,
                        float(world.GetCenter().y * CELL_SIZE)};
+  pod.pos = Vector2{player.pos.x - 24, player.pos.y};
+  pod.bounds.x = pod.pos.x;
+  pod.bounds.y = pod.pos.y;
 }
 
 static void Update(float dt) {
@@ -38,8 +44,13 @@ static void Update(float dt) {
   ui_camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
   player.Update(&world, dt);
 
+  // Check item collision with player
   for (auto it = world.items.begin(); it != world.items.end();) {
-    (*it).Update(dt, player.pos);
+    if (player.carbon < player.max_carbon) {
+      (*it).Update(dt, player.pos);
+    } else {
+      break;
+    }
 
     if (CheckCollisionCircles((*it).pos, 2, player.pos, 2)) {
       it = world.items.erase(it);
@@ -49,11 +60,17 @@ static void Update(float dt) {
     }
   }
 
+  // Show crafting panel
+  if (Vector2Distance(player.pos, pod.GetCenter()) <= 16) {
+    pod.showInfoPanel = true;
+  } else {
+    pod.showInfoPanel = false;
+  }
+
   camera.target = Vector2Add(player.pos, Vector2(4, 4));
 
-  mouse_pos = GetScreenToWorld2D(GetMousePosition(), camera);
-
   // Do damage to clicked rocks
+  mouse_pos = GetScreenToWorld2D(GetMousePosition(), camera);
   Vector2 mouse_world_pos = Vector2{float(int(mouse_pos.x / CELL_SIZE)),
                                     float(int(mouse_pos.y / CELL_SIZE))};
   if (world.GetTile(mouse_world_pos.x, mouse_world_pos.y)->isRock &&
@@ -70,22 +87,16 @@ static void Update(float dt) {
 
 static void Draw() {
   BeginMode2D(camera);
+
   world.DrawMap(spritesheet, Rectangle{camera.target.x - (GAME_WIDTH / 2),
                                        camera.target.y - (GAME_HEIGHT / 2),
                                        GAME_WIDTH, GAME_HEIGHT});
+  // Draw Player shadow
+  DrawCircleV(Vector2Add(player.pos, Vector2{4, 7}), 3, Color{15, 15, 15, 100});
   player.Draw(spritesheet);
 
-  // mouse_pos = GetScreenToWorld2D(GetMousePosition(), camera);
-  // Rectangle mouse_world_pos = Rectangle{
-  //     float(int(mouse_pos.x / CELL_SIZE) * CELL_SIZE),
-  //     float(int(mouse_pos.y / CELL_SIZE) * CELL_SIZE), CELL_SIZE, CELL_SIZE};
-  // if (Vector2Distance(Vector2{mouse_world_pos.x, mouse_world_pos.y},
-  //                     player.pos) <= 12) {
-  //   DrawRectangleLinesEx(mouse_world_pos, 0.5, YELLOW);
-  // } else {
-  //   DrawRectangleLinesEx(mouse_world_pos, 0.5, RED);
-  // }
-
+  // Droppod drawing routines
+  pod.Draw(spritesheet);
   EndMode2D();
 
   BeginMode2D(ui_camera);
@@ -94,10 +105,40 @@ static void Draw() {
   // DrawText(TextFormat("%i", player.carbon), 2, GAME_HEIGHT - 10, 8, WHITE);
   EndMode2D();
 
-  GuiPanel(Rectangle{0, 0, 128, 96}, "Debug Info");
+  GuiPanel(Rectangle{0, 0, 128, 52}, "Status");
   GuiLabel(Rectangle{0, 14, 128, 32},
-           TextFormat("Break Timer: %f", player.break_timer));
+           TextFormat("Suit Damage: %i", 100.0f - player.hp / player.max_hp));
   GuiLabel(Rectangle{0, 28, 128, 32}, TextFormat("Carbon: %i", player.carbon));
+
+  if (pod.showInfoPanel) {
+    GuiPanel(Rectangle{0, 56, 128, 72}, "Drop Pod");
+    GuiLabel(Rectangle{0, 80, 128, 14},
+             TextFormat("Shuttle Arrival: %i", pod.days_left));
+    GuiLabel(Rectangle{0, 94, 128, 14},
+             TextFormat("Stored Carbon: %i", pod.carbon));
+    if (GuiButton(Rectangle{0, 118, 48, 20}, "Craft")) {
+      pod.showCraftingPanel = true;
+    }
+
+    if (GuiButton(Rectangle{50, 118, 48, 20}, "Deposit Carbon")) {
+      pod.carbon += player.carbon;
+      player.carbon = 0;
+    }
+
+    if (pod.showCraftingPanel) {
+      int result =
+          GuiWindowBox(Rectangle{0, SCREEN_HEIGHT - (SCREEN_HEIGHT / 2), 128,
+                                 SCREEN_HEIGHT / 2},
+                       "Crafting");
+
+      if (TextureButton(spritesheet, 12, Rectangle{0, 248, 32, 32}, "Tether")) {
+      }
+
+      if (result > 0) {
+        pod.showCraftingPanel = false;
+      }
+    }
+  }
 }
 
 static void Unload() { UnloadTexture(spritesheet); }

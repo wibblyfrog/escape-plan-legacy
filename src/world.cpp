@@ -13,7 +13,12 @@ World::World() {
       tiles[idx] = Tile(4, true, 0, false);
     }
   }
+  // Clear center tile for player
   SetTile(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, Tile(5, false, 0, false));
+  // Make tiles near pod solid
+  SetTile((WORLD_WIDTH / 2) - 1, WORLD_HEIGHT / 2, Tile(5, true, 0, false));
+  SetTile((WORLD_WIDTH / 2) - 2, WORLD_HEIGHT / 2, Tile(5, true, 0, false));
+  SetTile((WORLD_WIDTH / 2) - 3, WORLD_HEIGHT / 2, Tile(5, true, 0, false));
 }
 World::~World() {}
 
