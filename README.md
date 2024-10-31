@@ -30,7 +30,7 @@ Keyboard:
   - [X] Rocks drop carbon, which can be collected by player
   - [ ] HP and Ammo
   - [ ] Shoot gun
-- [ ] Crafting system for O2 tethers, ammunition, and suit patches
+- [x] Crafting system for O2 tethers, ammunition, and suit patches
 - [ ] Placing/picking up tethers
 - [ ] Bug AI
 - [ ] Shuttle pickup end-game

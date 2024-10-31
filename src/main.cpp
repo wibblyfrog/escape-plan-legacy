@@ -4,6 +4,7 @@
 #include "droppod.h"
 #include "item.h"
 #include "player.h"
+#include "tether.h"
 #include "texture_button.h"
 #include "world.h"
 
@@ -17,6 +18,9 @@ World world;
 Player player;
 Droppod pod;
 Vector2 mouse_pos;
+
+// std::vector<Vector2> oxygen_sources;
+std::vector<Tether> tethers;
 
 static void Load() {
   camera = Camera2D{};
@@ -35,6 +39,9 @@ static void Load() {
   pod.pos = Vector2{player.pos.x - 24, player.pos.y};
   pod.bounds.x = pod.pos.x;
   pod.bounds.y = pod.pos.y;
+
+  tethers.push_back(Tether(Vector2{pod.pos.x + 12, pod.pos.y + 4}));
+  tethers.back().is_connected = true;
 }
 
 static void Update(float dt) {
@@ -61,7 +68,9 @@ static void Update(float dt) {
   }
 
   // Show crafting panel
-  if (Vector2Distance(player.pos, pod.GetCenter()) <= 16) {
+  if (CheckCollisionRecs(
+          Rectangle{player.pos.x, player.pos.y, CELL_SIZE, CELL_SIZE},
+          Rectangle{pod.pos.x - 4, pod.pos.y - 4, 36, 22})) {
     pod.showInfoPanel = true;
   } else {
     pod.showInfoPanel = false;
@@ -83,6 +92,26 @@ static void Update(float dt) {
       player.break_timer = player.break_time;
     }
   }
+
+  // Place tether on right-click if near another tether
+  if (player.tethers > 0 && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+    bool can_place = false;
+    for (auto tether : tethers) {
+      if (CheckCollisionPointCircle(
+              Vector2{float(mouse_world_pos.x * CELL_SIZE) + 4,
+                      float(mouse_world_pos.y * CELL_SIZE) + 4},
+              tether.pos, tether.range)) {
+        can_place = true;
+      }
+    }
+
+    if (can_place == true) {
+      tethers.push_back(
+          Tether(Vector2{float(mouse_world_pos.x * CELL_SIZE) + 4,
+                         float(mouse_world_pos.y * CELL_SIZE) + 4}));
+      player.tethers -= 1;
+    }
+  }
 }
 
 static void Draw() {
@@ -93,48 +122,63 @@ static void Draw() {
                                        GAME_WIDTH, GAME_HEIGHT});
   // Draw Player shadow
   DrawCircleV(Vector2Add(player.pos, Vector2{4, 7}), 3, Color{15, 15, 15, 100});
+
+  for (int i = 0; i < tethers.size(); i++) {
+    Tether& tether = tethers[i];
+
+    if (CheckCollisionPointCircle(player.pos, tether.pos, tether.range)) {
+      DrawLineEx(tether.pos, Vector2{player.pos.x + 4, player.pos.y + 4}, 1.0f,
+                 BLUE);
+    }
+
+    for (int i = 0; i < tethers.size(); i++) {
+      Tether& prev = tethers[i - 1];
+      if (CheckCollisionPointCircle(prev.pos, tether.pos, tether.range)) {
+        DrawLineEx(tether.pos, prev.pos, 2.0f, BLUE);
+      }
+    }
+    // DrawLineEx(tether.pos, prev.pos, 2.0f, BLUE);
+    DrawSprite(spritesheet, 12, tether.pos.x - 4, tether.pos.y - 4, 1.0f,
+               WHITE);
+  }
+
   player.Draw(spritesheet);
 
   // Droppod drawing routines
   pod.Draw(spritesheet);
+
   EndMode2D();
 
-  BeginMode2D(ui_camera);
-  // DrawCircle(0, GAME_HEIGHT, 17, WHITE);
-  // DrawCircle(0, GAME_HEIGHT, 16, BLACK);
-  // DrawText(TextFormat("%i", player.carbon), 2, GAME_HEIGHT - 10, 8, WHITE);
-  EndMode2D();
-
-  GuiPanel(Rectangle{0, 0, 128, 66}, "Status");
-  GuiLabel(Rectangle{0, 14, 128, 32},
+  GuiPanel(Rectangle{2, 2, 128, 66}, "Status");
+  GuiLabel(Rectangle{4, 16, 128, 32},
            TextFormat("Suit Damage: %i", 100.0f - player.hp / player.max_hp));
-  GuiLabel(Rectangle{0, 28, 128, 32}, TextFormat("Carbon: %i", player.carbon));
-  GuiLabel(Rectangle{0, 42, 128, 32},
+  GuiLabel(Rectangle{4, 30, 128, 32}, TextFormat("Carbon: %i", player.carbon));
+  GuiLabel(Rectangle{4, 44, 128, 32},
            TextFormat("Tethers: %i", player.tethers));
 
   if (pod.showInfoPanel) {
-    GuiPanel(Rectangle{0, 70, 128, 72}, "Drop Pod");
-    GuiLabel(Rectangle{0, 100, 128, 14},
+    GuiPanel(Rectangle{2, 70, 128, 72}, "Drop Pod");
+    GuiLabel(Rectangle{4, 100, 128, 14},
              TextFormat("Shuttle Arrival: %i", pod.days_left));
-    GuiLabel(Rectangle{0, 116, 128, 14},
+    GuiLabel(Rectangle{4, 116, 128, 14},
              TextFormat("Stored Carbon: %i", pod.carbon));
-    if (GuiButton(Rectangle{0, 132, 48, 20}, "Craft")) {
+    if (GuiButton(Rectangle{4, 132, 48, 20}, "Craft")) {
       pod.showCraftingPanel = true;
     }
 
-    if (GuiButton(Rectangle{50, 132, 48, 20}, "Deposit Carbon")) {
+    if (GuiButton(Rectangle{54, 132, 48, 20}, "Deposit Carbon")) {
       pod.carbon += player.carbon;
       player.carbon = 0;
     }
 
     if (pod.showCraftingPanel) {
       int result =
-          GuiWindowBox(Rectangle{0, SCREEN_HEIGHT - (SCREEN_HEIGHT / 2), 128,
-                                 SCREEN_HEIGHT / 2},
+          GuiWindowBox(Rectangle{2, SCREEN_HEIGHT - (SCREEN_HEIGHT / 2), 128,
+                                 (SCREEN_HEIGHT / 2) - 2},
                        "Crafting");
 
-      if (TextureButton(spritesheet, 12, Rectangle{0, 248, 32, 32},
-                        "Tether (x20)")) {
+      if (TextureButton(spritesheet, 12, Rectangle{4, 252, 32, 32},
+                        "Tether\n(-10 C)")) {
         if (pod.carbon >= 10) {
           pod.carbon -= 10;
           player.tethers += 1;
@@ -145,6 +189,10 @@ static void Draw() {
         pod.showCraftingPanel = false;
       }
     }
+  }
+
+  if (GuiButton(Rectangle{SCREEN_WIDTH - 64, 0, 64, 20}, "Fill carbon")) {
+    player.carbon = player.max_carbon;
   }
 }
 
@@ -161,6 +209,7 @@ static void UpdateDrawFrame() {
 
 int main(void) {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Escape Plan");
+  // GuiLoadStyle("resources/styles/amber/style_amber.rgs");
   SetTraceLogLevel(LOG_ALL);
   Load();
 

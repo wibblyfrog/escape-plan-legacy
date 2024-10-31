@@ -24,6 +24,8 @@ struct Player {
   float break_timer;
   float break_time = 0.2;
 
+  int selected_item = 0;
+
   void Update(World* world, float dt);
   void Draw(Texture2D spritesheet);
 };

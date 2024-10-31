@@ -9,7 +9,7 @@ enum ItemTypes { TETHER, PATCH, AMMO };
 struct Droppod {
  public:
   Vector2 pos;
-  Rectangle bounds;
+  Rectangle bounds = {0, 0, 24, 8};
 
   int carbon = 0;
   int days_left = 15;
