@@ -14,12 +14,17 @@ void Player::Update(World *world, float dt)
   else if (connected_to_tether == false && timer <= 0)
   {
     hp -= 1;
-    timer = 10.0f;
+    timer = timer_max;
   }
-  else
+  else if (connected_to_tether)
   {
-    timer = 10.0f;
+    timer += 2 * dt;
   }
+  timer = Clamp(timer, 0, timer_max);
+  // else
+  // {
+  //   timer = timer_max;
+  // }
 
   if (IsKeyDown(KEY_W) && !world->IsSolid(pos.x, pos.y - 1) &&
       !world->IsSolid(pos.x + 7, pos.y - 1))

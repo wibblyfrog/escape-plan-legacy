@@ -18,6 +18,7 @@ struct Game
   Player player;
   Droppod pod;
   Vector2 mouse_pos;
+  bool paused = false;
 
   std::vector<Tether> tethers;
   void Load();

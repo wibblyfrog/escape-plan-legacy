@@ -25,97 +25,107 @@ void Game::Load()
 
 void Game::Update(float dt)
 {
-  //* Maintain vertical size
-  camera.offset = Vector2{(SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2)};
-  camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
-  ui_camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
-  player.Update(&world, dt);
-
-  // Check item collision with player
-  for (auto it = world.items.begin(); it != world.items.end();)
+  if (IsKeyPressed(KEY_ESCAPE))
+    paused = !paused;
+  if (!paused)
   {
-    if (player.carbon < player.max_carbon)
-    {
-      (*it).Update(dt, player.pos);
-    }
-    else
-    {
-      break;
-    }
+    //* Maintain vertical size
+    camera.offset = Vector2{(SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2)};
+    camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
+    ui_camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
+    player.Update(&world, dt);
 
-    if (CheckCollisionCircles((*it).pos, 2, player.pos, 2))
+    // Check item collision with player
+    for (auto it = world.items.begin(); it != world.items.end();)
     {
-      it = world.items.erase(it);
-      player.carbon++;
-    }
-    else
-    {
-      ++it;
-    }
-  }
-
-  // Show crafting panel
-  if (CheckCollisionRecs(
-          Rectangle{player.pos.x, player.pos.y, CELL_SIZE, CELL_SIZE},
-          Rectangle{pod.pos.x - 4, pod.pos.y - 4, 36, 22}))
-  {
-    pod.showInfoPanel = true;
-  }
-  else
-  {
-    pod.showInfoPanel = false;
-  }
-
-  camera.target = Vector2Add(player.pos, Vector2(4, 4));
-
-  // Do damage to clicked rocks
-  mouse_pos = GetScreenToWorld2D(GetMousePosition(), camera);
-  Vector2 mouse_world_pos = Vector2{float(int(mouse_pos.x / CELL_SIZE)),
-                                    float(int(mouse_pos.y / CELL_SIZE))};
-  if (world.GetTile(mouse_world_pos.x, mouse_world_pos.y)->isRock &&
-      IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
-      Vector2Distance(
-          Vector2{mouse_world_pos.x * CELL_SIZE, mouse_world_pos.y * CELL_SIZE},
-          player.pos) <= player.break_dist)
-  {
-    if (player.break_timer <= 0)
-    {
-      world.DamageTile(mouse_world_pos.x, mouse_world_pos.y, 1);
-      player.break_timer = player.break_time;
-    }
-  }
-
-  // Place tether if near another tether
-  if (player.tethers > 0 && IsKeyPressed(KEY_SPACE))
-  {
-    bool can_place = false;
-    for (auto tether : tethers)
-    {
-      if (CheckCollisionPointCircle(
-              Vector2{float(player.pos.x) + 4,
-                      float(player.pos.y) + 4},
-              tether.pos, tether.range))
+      if (player.carbon < player.max_carbon)
       {
-        can_place = true;
+        (*it).Update(dt, player.pos);
+      }
+      else
+      {
+        break;
+      }
+
+      if (CheckCollisionCircles((*it).pos, 2, player.pos, 2))
+      {
+        it = world.items.erase(it);
+        player.carbon++;
+      }
+      else
+      {
+        ++it;
       }
     }
 
-    if (can_place == true)
+    // Show crafting panel
+    if (CheckCollisionRecs(
+            Rectangle{player.pos.x, player.pos.y, CELL_SIZE, CELL_SIZE},
+            Rectangle{pod.pos.x - 4, pod.pos.y - 4, 36, 22}))
     {
-      tethers.push_back(Tether(player.pos));
-      player.tethers -= 1;
+      pod.showInfoPanel = true;
     }
-  }
-
-  // Check if player is connected to tether
-  for (auto tether : tethers)
-  {
-    player.connected_to_tether = false;
-    if (CheckCollisionPointCircle(
-            Vector2{player.pos.x + 4, player.pos.y + 4},
-            tether.pos, tether.range))
+    else
     {
-      player.connected_to_tether = true;
+      pod.showInfoPanel = false;
+    }
+
+    camera.target = Vector2Add(player.pos, Vector2(4, 4));
+
+    // Do damage to clicked rocks
+    mouse_pos = GetScreenToWorld2D(GetMousePosition(), camera);
+    Vector2 mouse_world_pos = Vector2{float(int(mouse_pos.x / CELL_SIZE)),
+                                      float(int(mouse_pos.y / CELL_SIZE))};
+    if (world.GetTile(mouse_world_pos.x, mouse_world_pos.y)->isRock &&
+        IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
+        Vector2Distance(
+            Vector2{mouse_world_pos.x * CELL_SIZE, mouse_world_pos.y * CELL_SIZE},
+            player.pos) <= player.break_dist)
+    {
+      if (player.break_timer <= 0)
+      {
+        world.DamageTile(mouse_world_pos.x, mouse_world_pos.y, 1);
+        player.break_timer = player.break_time;
+      }
+    }
+
+    // Place tether if near another tether
+    if (player.tethers > 0 && IsKeyPressed(KEY_SPACE))
+    {
+      bool can_place = false;
+      for (auto tether : tethers)
+      {
+        if (CheckCollisionPointCircle(
+                Vector2{float(player.pos.x) + 4,
+                        float(player.pos.y) + 4},
+                tether.pos, tether.range))
+        {
+          can_place = true;
+        }
+      }
+
+      if (can_place == true)
+      {
+        tethers.push_back(Tether(Vector2{player.pos.x + 4, player.pos.y + 4}));
+        player.tethers -= 1;
+      }
+    }
+
+    // Check if player is connected to tether
+    player.connected_to_tether = false;
+    for (auto tether : tethers)
+    {
+      if (CheckCollisionPointCircle(
+              Vector2{player.pos.x + 4, player.pos.y + 4},
+              tether.pos, tether.range))
+      {
+        player.connected_to_tether = true;
+      }
+    }
+
+    if (player.hp <= 0)
+    {
+      ChangeState(GameState::GAME_OVER);
     }
   }
 }
@@ -159,6 +169,8 @@ void Game::Draw()
 
   EndMode2D();
 
+  // if (!paused)
+  // {
   GuiPanel(Rectangle{2, 2, 128, 84}, "Status");
   GuiLabel(Rectangle{4, 16, 128, 32},
            TextFormat("Timer: %.0f%", player.timer));
@@ -215,6 +227,21 @@ void Game::Draw()
   if (GuiButton(Rectangle{SCREEN_WIDTH - 64, 0, 64, 20}, "Fill carbon"))
   {
     player.carbon = player.max_carbon;
+  }
+  // }
+
+  if (paused)
+  {
+    DrawRectangle(0, 0, float(SCREEN_WIDTH), float(SCREEN_HEIGHT), Color{0, 0, 0, 50});
+    DrawText("PAUSED", 4, 4, 64, WHITE);
+    if (GuiButton(Rectangle{4, SCREEN_HEIGHT - 48 - 72, 128, 48}, "Resume"))
+    {
+      paused = false;
+    }
+    if (GuiButton(Rectangle{4, SCREEN_HEIGHT - 48 - 128, 128, 48}, "Quit"))
+    {
+      ChangeState(GameState::MENU);
+    }
   }
 }
 

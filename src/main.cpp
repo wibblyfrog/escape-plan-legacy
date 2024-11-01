@@ -8,7 +8,7 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-enum GameState state = GameState::GAME;
+enum GameState state = GameState::MENU;
 Menu menu;
 Game game;
 GameOver game_over;

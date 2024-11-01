@@ -10,9 +10,10 @@ struct Player
   Vector2 pos;
   Vector2 vel;
   float speed = 25;
-  int hp = 10;
-  int max_hp = 10;
-  float timer = 10;
+  int hp = 5;
+  int max_hp = 5;
+  float timer = 5;
+  float timer_max = 5;
 
   int carbon = 0;
   int max_carbon = 20;
