@@ -5,7 +5,7 @@
       "name": "(gdb) Launch",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/escape_plan/escape_plan.exe",
+      "program": "${workspaceFolder}/build/${workspaceFolderBasename}/${workspaceFolderBasename}.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
@@ -26,6 +26,12 @@
         }
       ],
       "preLaunchTask": "rebuild"
+    },
+    {
+      "type": "chrome",
+      "name": "Web Debug",
+      "request": "launch",
+      "url": "http://127.0.0.1:5500/build/${workspaceFolderBasename}/${workspaceFolderBasename}.html"
     }
   ]
 }

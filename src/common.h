@@ -16,3 +16,13 @@ const int WORLD_HEIGHT = 500;
 const int SPRITESHEET_WIDTH = 8;
 const int SPRITESHEET_HEIGHT = 8;
 const int CELL_SIZE = 8;
+
+enum GameState
+{
+  MENU,
+  GAME,
+  GAME_OVER,
+  GAME_WON
+};
+
+void ChangeState(enum GameState new_state);

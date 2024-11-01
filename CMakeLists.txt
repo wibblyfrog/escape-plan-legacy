@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24...3.30)
-project(escape_plan CXX)
+project(escape-plan CXX)
 
 # set(CMAKE_TOOLCHAIN_FILE "C:/Apps/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake")
 
@@ -59,7 +59,7 @@ target_link_libraries(${PROJECT_NAME} raylib)
 if ("${PLATFORM}" STREQUAL "Web")
     # Tell Emscripten to build an example.html file.
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
-    target_link_options(${PROJECT_NAME} PUBLIC -g --sALLOW_MEMORY_GROWTH -sUSE_GLFW=3 PUBLIC --preload-file resources --use-preload-plugins --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/src/minshell.html)
+    target_link_options(${PROJECT_NAME} PUBLIC -g -sTOTAL_MEMORY=67108864 -sUSE_GLFW=3 PUBLIC --preload-file resources --use-preload-plugins --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/src/minshell.html)
 endif()
 
 # Checks if OSX and links appropriate frameworks (Only required on MacOS)
