@@ -12,11 +12,11 @@ struct Player
   float speed = 25;
   int hp = 5;
   int max_hp = 5;
-  float timer = 5;
-  float timer_max = 5;
+  float timer = 10;
+  float timer_max = 10;
 
   int carbon = 0;
-  int max_carbon = 20;
+  int max_carbon = 50;
 
   int tethers = 0;
   bool connected_to_tether = false;

@@ -46,9 +46,9 @@ void Player::Update(World *world, float dt)
     {
       Vector2 dir = Vector2Normalize(Vector2Subtract(GetScreenToWorld2D(GetMousePosition(), (*game_camera)), pos));
       float a = atan2(dir.y, dir.x);
-      SpawnBullet(Vector2{pos.x + 4, pos.y + 3}, dir, a - 0.1);
+      SpawnBullet(Vector2{pos.x + 4, pos.y + 4}, dir, a - 0.1);
       SpawnBullet(Vector2{pos.x + 4, pos.y + 4}, dir, a);
-      SpawnBullet(Vector2{pos.x + 4, pos.y + 5}, dir, a + 0.1);
+      SpawnBullet(Vector2{pos.x + 4, pos.y + 4}, dir, a + 0.1);
       ammo -= 1;
       fire_timer = fire_time;
     }

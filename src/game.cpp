@@ -28,6 +28,13 @@ void Game::Load()
 
   tethers.push_back(Tether(Vector2{pod.pos.x + 12, pod.pos.y + 4}));
   tethers.back().is_connected = true;
+
+  for (int i = 0; i < 50; i++)
+  {
+    Vector2 pos = Vector2{
+        float(GetRandomValue(0, WORLD_WIDTH * CELL_SIZE)), float(GetRandomValue(0, WORLD_HEIGHT * CELL_SIZE))};
+    squibs.push_back(Squib(pos));
+  }
 }
 
 void Game::Update(float dt)
@@ -134,19 +141,60 @@ void Game::Update(float dt)
       ChangeState(GameState::GAME_OVER);
     }
 
+    // Update squibs
+    for (auto squib = squibs.begin(); squib != squibs.end();)
+    {
+      // if (Vector2Distance((*squib).pos, player.pos) < 128)
+      // {
+      Vector2 dir = Vector2Normalize(Vector2Subtract(player.pos, (*squib).pos));
+      (*squib).pos.x += dir.x * 10 * dt;
+      (*squib).pos.y += dir.y * 10 * dt;
+      // }
+
+      if ((*squib).health <= 0)
+        (*squib).alive = false;
+
+      if (!(*squib).alive)
+      {
+        squib = squibs.erase(squib);
+      }
+      else
+      {
+        squib++;
+      }
+    }
+
     // Update bullets
     for (auto bullet = bullets.begin(); bullet != bullets.end();)
     {
       (*bullet).lifetime -= dt;
       (*bullet).pos.x += (cos((*bullet).angle)) * 125 * dt;
       (*bullet).pos.y += (sin((*bullet).angle)) * 125 * dt;
+
       if ((*bullet).lifetime <= 0)
+      {
+        (*bullet).alive = false;
+      }
+      if (!(*bullet).alive)
       {
         bullet = bullets.erase(bullet);
       }
       else
       {
         bullet++;
+      }
+    }
+  }
+
+  // Check Squib -> Bullet collisions
+  for (auto &bullet : bullets)
+  {
+    for (auto &squib : squibs)
+    {
+      if (CheckCollisionCircles(Vector2{bullet.pos.x + 4, bullet.pos.y + 4}, 2, Vector2{squib.pos.x + 8, squib.pos.y + 8}, 8))
+      {
+        squib.health -= 1;
+        bullet.alive = false;
       }
     }
   }
@@ -184,6 +232,12 @@ void Game::Draw()
                WHITE);
   }
 
+  // Draw Squibs
+  for (auto squib : squibs)
+  {
+    squib.Draw(spritesheet);
+  }
+
   // Draw Player
   player.Draw(spritesheet);
 
@@ -214,7 +268,7 @@ void Game::Draw()
       spritesheet,
       Rectangle{7 * CELL_SIZE, 0, CELL_SIZE, CELL_SIZE * flip},
       Rectangle{player.pos.x + 4, player.pos.y + 4, CELL_SIZE, CELL_SIZE},
-      Vector2{2, 4},
+      Vector2{4, 4},
       angle,
       WHITE);
   EndMode2D();
@@ -253,10 +307,6 @@ void Game::Draw()
                TextFormat("Shuttle Arrival: %i", pod.days_left));
       GuiLabel(Rectangle{4, 128, 128, 14},
                TextFormat("Stored Carbon: %i", pod.carbon));
-      // if (GuiButton(Rectangle{4, 142, 48, 20}, "Craft"))
-      // {
-      //   pod.showCraftingPanel = true;
-      // }
 
       if (GuiButton(Rectangle{4, 142, 124, 20}, "Deposit"))
       {
@@ -284,7 +334,7 @@ void Game::Draw()
       if (TextureButton(spritesheet, 14, Rectangle{4, 252 + 34, 124, 32},
                         "Ammo x32\n(-5 C)"))
       {
-        if (pod.carbon >= 5)
+        if (pod.carbon >= 5 && player.ammo < player.max_ammo)
         {
           player.ammo += 32;
           player.ammo = Clamp(player.ammo, 0, player.max_ammo);

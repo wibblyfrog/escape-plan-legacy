@@ -6,7 +6,7 @@ World::World()
   {
     tiles.push_back(Tile(5, false, 0, false));
     // Create random rocks
-    if (GetRandomValue(0, 100) <= 2)
+    if (GetRandomValue(0, 100) <= 5)
     {
       tiles[idx] = Tile(3, true, 3, true);
     }
