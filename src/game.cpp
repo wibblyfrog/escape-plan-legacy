@@ -1,5 +1,14 @@
 #include "game.h"
 
+void Game::SpawnBullet(Vector2 pos, float angle)
+{
+  Vector2 dir = Vector2Normalize(Vector2Subtract(GetScreenToWorld2D(GetMousePosition(), camera), pos));
+  // pos.x += dir.x * 8;
+  // pos.y += dir.y;
+  bullets.push_back(Bullet{pos, dir, angle});
+  TraceLog(LOG_DEBUG, TextFormat("Added bullet # %d", bullets.size()));
+}
+
 void Game::Load()
 {
   camera = Camera2D{};
@@ -77,7 +86,7 @@ void Game::Update(float dt)
     Vector2 mouse_world_pos = Vector2{float(int(mouse_pos.x / CELL_SIZE)),
                                       float(int(mouse_pos.y / CELL_SIZE))};
     if (world.GetTile(mouse_world_pos.x, mouse_world_pos.y)->isRock &&
-        IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
+        IsMouseButtonDown(MOUSE_BUTTON_RIGHT) &&
         Vector2Distance(
             Vector2{mouse_world_pos.x * CELL_SIZE, mouse_world_pos.y * CELL_SIZE},
             player.pos) <= player.break_dist)
@@ -127,6 +136,15 @@ void Game::Update(float dt)
     {
       ChangeState(GameState::GAME_OVER);
     }
+
+    // Update bullets
+    for (auto &bullet : bullets)
+    {
+      // bullet.pos.y += sin(bullet.angle) * 10 * dt;
+      // bullet.pos.x += cos(bullet.angle) * 10 * dt;
+      bullet.pos.x += bullet.dir.x * 10 * dt;
+      bullet.pos.y += bullet.dir.y * 10 * dt;
+    }
   }
 }
 
@@ -167,15 +185,23 @@ void Game::Draw()
   // Droppod drawing routines
   pod.Draw(spritesheet);
 
+  // Draw bullets
+  for (int i = 0; i < bullets.size(); i++)
+  {
+    DrawTexturePro(
+        spritesheet,
+        Rectangle{56, 8, CELL_SIZE, CELL_SIZE},
+        Rectangle{bullets[i].pos.x, bullets[i].pos.y, CELL_SIZE, CELL_SIZE},
+        Vector2{4, 4},
+        bullets[i].angle,
+        WHITE);
+  }
+
   EndMode2D();
 
-  // if (!paused)
-  // {
   GuiPanel(Rectangle{2, 2, 128, 84}, "Status");
   GuiLabel(Rectangle{4, 16, 128, 32},
-           TextFormat("Timer: %.0f%", player.timer));
-  // GuiLabel(Rectangle{4, 16, 128, 32},
-  //          TextFormat("Oxygen: %.0f%", player.oxygen));
+           TextFormat("Gun Angle: %f", atan2(GetMouseY() - (SCREEN_HEIGHT / 2), GetMouseX() - (SCREEN_WIDTH / 2)) * (180.0f / PI)));
   GuiLabel(Rectangle{4, 32, 128, 32},
            TextFormat("Health: %i", player.hp));
   GuiLabel(Rectangle{4, 48, 128, 32}, TextFormat("Carbon: %i", player.carbon));
@@ -228,7 +254,6 @@ void Game::Draw()
   {
     player.carbon = player.max_carbon;
   }
-  // }
 
   if (paused)
   {

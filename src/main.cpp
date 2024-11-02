@@ -8,11 +8,16 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-enum GameState state = GameState::MENU;
+enum GameState state = GameState::GAME;
 Menu menu;
 Game game;
 GameOver game_over;
 GameWon game_won;
+
+void SpawnBullet(Vector2 pos, float angle)
+{
+  game.SpawnBullet(pos, angle);
+}
 
 void ChangeState(enum GameState new_state)
 {

@@ -26,3 +26,4 @@ enum GameState
 };
 
 void ChangeState(enum GameState new_state);
+void SpawnBullet(Vector2 position, float angle);

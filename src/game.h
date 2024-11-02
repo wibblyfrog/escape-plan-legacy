@@ -9,6 +9,13 @@
 #include "utils.h"
 #include "world.h"
 
+struct Bullet
+{
+  Vector2 pos;
+  Vector2 dir;
+  float angle;
+};
+
 struct Game
 {
   Camera2D camera;
@@ -18,9 +25,12 @@ struct Game
   Player player;
   Droppod pod;
   Vector2 mouse_pos;
+  std::vector<Bullet> bullets;
+  std::vector<Tether> tethers;
   bool paused = false;
 
-  std::vector<Tether> tethers;
+  void SpawnBullet(Vector2 pos, float angle);
+
   void Load();
   void Update(float dt);
   void Draw();
