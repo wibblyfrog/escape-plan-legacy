@@ -39,33 +39,23 @@ void Player::Update(World *world, float dt)
 
   // Shoot bullet
   float angle = atan2(GetMouseY() - (SCREEN_HEIGHT / 2), GetMouseX() - (SCREEN_WIDTH / 2)) * (180.0f / PI);
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+  fire_timer -= dt;
+  if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && can_shoot)
   {
-    // TraceLog(LOG_DEBUG, "Shoot bullet");
-    TraceLog(LOG_DEBUG, TextFormat("%f, %f", cos(angle) * dt, sin(angle) * dt));
-    SpawnBullet(Vector2Add(Vector2{pos.x + 4, pos.y + 4}, Vector2{float(cos(angle)), float(sin(angle))}), angle);
+    if (fire_timer <= 0 && ammo > 0)
+    {
+      Vector2 dir = Vector2Normalize(Vector2Subtract(GetScreenToWorld2D(GetMousePosition(), (*game_camera)), pos));
+      float a = atan2(dir.y, dir.x);
+      SpawnBullet(Vector2{pos.x + 4, pos.y + 3}, dir, a - 0.1);
+      SpawnBullet(Vector2{pos.x + 4, pos.y + 4}, dir, a);
+      SpawnBullet(Vector2{pos.x + 4, pos.y + 5}, dir, a + 0.1);
+      ammo -= 1;
+      fire_timer = fire_time;
+    }
   }
 }
 
 void Player::Draw(Texture2D spritesheet)
 {
   DrawSprite(spritesheet, 0, pos, 1.0);
-  // DrawSprite(spritesheet, 7, Vector2{pos.x + 4, pos.y + 4}, 1.0f, WHITE);
-
-  // Flip gun if past angle
-  float angle = atan2(GetMouseY() - (SCREEN_HEIGHT / 2), GetMouseX() - (SCREEN_WIDTH / 2)) * (180.0f / PI);
-  float flip = 1;
-  if (abs(angle) > 90)
-  {
-    flip = -1;
-  }
-
-  // Draw Gun
-  DrawTexturePro(
-      spritesheet,
-      Rectangle{7 * CELL_SIZE, 0, CELL_SIZE, CELL_SIZE * flip},
-      Rectangle{pos.x + 4, pos.y + 4, CELL_SIZE, CELL_SIZE},
-      Vector2{-1, 4},
-      angle,
-      WHITE);
 }

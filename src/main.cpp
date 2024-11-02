@@ -3,6 +3,7 @@
 #include "game_over.h"
 #include "game_won.h"
 #include "menu.h"
+#include "player.h"
 #include <vector>
 
 #define RAYGUI_IMPLEMENTATION
@@ -13,10 +14,16 @@ Menu menu;
 Game game;
 GameOver game_over;
 GameWon game_won;
+Camera2D *game_camera;
 
-void SpawnBullet(Vector2 pos, float angle)
+void SetPlayerCanShoot(bool can_shoot)
 {
-  game.SpawnBullet(pos, angle);
+  game.player.can_shoot = can_shoot;
+}
+
+void SpawnBullet(Vector2 pos, Vector2 dir, float angle)
+{
+  game.SpawnBullet(pos, dir, angle);
 }
 
 void ChangeState(enum GameState new_state)

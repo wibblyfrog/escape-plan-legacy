@@ -1,10 +1,7 @@
 #include "game.h"
 
-void Game::SpawnBullet(Vector2 pos, float angle)
+void Game::SpawnBullet(Vector2 pos, Vector2 dir, float angle)
 {
-  Vector2 dir = Vector2Normalize(Vector2Subtract(GetScreenToWorld2D(GetMousePosition(), camera), pos));
-  // pos.x += dir.x * 8;
-  // pos.y += dir.y;
   bullets.push_back(Bullet{pos, dir, angle});
   TraceLog(LOG_DEBUG, TextFormat("Added bullet # %d", bullets.size()));
 }
@@ -13,6 +10,7 @@ void Game::Load()
 {
   camera = Camera2D{};
   camera.offset = Vector2{GAME_WIDTH / 2, GAME_HEIGHT / 2};
+  game_camera = &camera;
 
   ui_camera = Camera2D{};
 
@@ -43,6 +41,7 @@ void Game::Update(float dt)
     camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
     ui_camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
     player.Update(&world, dt);
+    player.can_shoot = true;
 
     // Check item collision with player
     for (auto it = world.items.begin(); it != world.items.end();)
@@ -87,9 +86,9 @@ void Game::Update(float dt)
                                       float(int(mouse_pos.y / CELL_SIZE))};
     if (world.GetTile(mouse_world_pos.x, mouse_world_pos.y)->isRock &&
         IsMouseButtonDown(MOUSE_BUTTON_RIGHT) &&
-        Vector2Distance(
-            Vector2{mouse_world_pos.x * CELL_SIZE, mouse_world_pos.y * CELL_SIZE},
-            player.pos) <= player.break_dist)
+        Vector2Distance(Vector2{mouse_world_pos.x * CELL_SIZE,
+                                mouse_world_pos.y * CELL_SIZE},
+                        player.pos) <= player.break_dist)
     {
       if (player.break_timer <= 0)
       {
@@ -105,8 +104,7 @@ void Game::Update(float dt)
       for (auto tether : tethers)
       {
         if (CheckCollisionPointCircle(
-                Vector2{float(player.pos.x) + 4,
-                        float(player.pos.y) + 4},
+                Vector2{float(player.pos.x) + 4, float(player.pos.y) + 4},
                 tether.pos, tether.range))
         {
           can_place = true;
@@ -124,9 +122,8 @@ void Game::Update(float dt)
     player.connected_to_tether = false;
     for (auto tether : tethers)
     {
-      if (CheckCollisionPointCircle(
-              Vector2{player.pos.x + 4, player.pos.y + 4},
-              tether.pos, tether.range))
+      if (CheckCollisionPointCircle(Vector2{player.pos.x + 4, player.pos.y + 4},
+                                    tether.pos, tether.range))
       {
         player.connected_to_tether = true;
       }
@@ -138,12 +135,19 @@ void Game::Update(float dt)
     }
 
     // Update bullets
-    for (auto &bullet : bullets)
+    for (auto bullet = bullets.begin(); bullet != bullets.end();)
     {
-      // bullet.pos.y += sin(bullet.angle) * 10 * dt;
-      // bullet.pos.x += cos(bullet.angle) * 10 * dt;
-      bullet.pos.x += bullet.dir.x * 10 * dt;
-      bullet.pos.y += bullet.dir.y * 10 * dt;
+      (*bullet).lifetime -= dt;
+      (*bullet).pos.x += (cos((*bullet).angle)) * 125 * dt;
+      (*bullet).pos.y += (sin((*bullet).angle)) * 125 * dt;
+      if ((*bullet).lifetime <= 0)
+      {
+        bullet = bullets.erase(bullet);
+      }
+      else
+      {
+        bullet++;
+      }
     }
   }
 }
@@ -180,60 +184,93 @@ void Game::Draw()
                WHITE);
   }
 
+  // Draw Player
   player.Draw(spritesheet);
 
   // Droppod drawing routines
   pod.Draw(spritesheet);
 
   // Draw bullets
-  for (int i = 0; i < bullets.size(); i++)
+  for (auto bullet : bullets)
   {
+    Vector2 screen_pos = GetWorldToScreen2D(bullet.pos, camera);
+    float angle = atan2(screen_pos.y - (SCREEN_HEIGHT / 2), screen_pos.x - (SCREEN_WIDTH / 2)) * (180.0f / PI);
     DrawTexturePro(
-        spritesheet,
-        Rectangle{56, 8, CELL_SIZE, CELL_SIZE},
-        Rectangle{bullets[i].pos.x, bullets[i].pos.y, CELL_SIZE, CELL_SIZE},
-        Vector2{4, 4},
-        bullets[i].angle,
-        WHITE);
+        spritesheet, Rectangle{56, 8, CELL_SIZE, CELL_SIZE},
+        Rectangle{bullet.pos.x, bullet.pos.y, CELL_SIZE, CELL_SIZE},
+        Vector2{4, 4}, angle, WHITE);
   }
 
+  // Flip gun if past angle
+  float angle = atan2(GetMouseY() - (SCREEN_HEIGHT / 2), GetMouseX() - (SCREEN_WIDTH / 2)) * (180.0f / PI);
+  float flip = 1;
+  if (abs(angle) > 90)
+  {
+    flip = -1;
+  }
+
+  // Draw Gun
+  DrawTexturePro(
+      spritesheet,
+      Rectangle{7 * CELL_SIZE, 0, CELL_SIZE, CELL_SIZE * flip},
+      Rectangle{player.pos.x + 4, player.pos.y + 4, CELL_SIZE, CELL_SIZE},
+      Vector2{2, 4},
+      angle,
+      WHITE);
   EndMode2D();
 
-  GuiPanel(Rectangle{2, 2, 128, 84}, "Status");
-  GuiLabel(Rectangle{4, 16, 128, 32},
-           TextFormat("Gun Angle: %f", atan2(GetMouseY() - (SCREEN_HEIGHT / 2), GetMouseX() - (SCREEN_WIDTH / 2)) * (180.0f / PI)));
-  GuiLabel(Rectangle{4, 32, 128, 32},
-           TextFormat("Health: %i", player.hp));
-  GuiLabel(Rectangle{4, 48, 128, 32}, TextFormat("Carbon: %i", player.carbon));
-  GuiLabel(Rectangle{4, 64, 128, 32},
-           TextFormat("Tethers: %i", player.tethers));
-
-  if (pod.showInfoPanel)
+  if (paused)
   {
-    GuiPanel(Rectangle{2, 90, 128, 72}, "Drop Pod");
-    GuiLabel(Rectangle{4, 114, 128, 14},
-             TextFormat("Shuttle Arrival: %i", pod.days_left));
-    GuiLabel(Rectangle{4, 128, 128, 14},
-             TextFormat("Stored Carbon: %i", pod.carbon));
-    if (GuiButton(Rectangle{4, 142, 48, 20}, "Craft"))
+    DrawRectangle(0, 0, float(SCREEN_WIDTH), float(SCREEN_HEIGHT),
+                  Color{0, 0, 0, 50});
+    DrawText("PAUSED", 4, 4, 64, WHITE);
+    if (GuiButton(Rectangle{4, SCREEN_HEIGHT - 48 - 72, 128, 48}, "Resume"))
     {
-      pod.showCraftingPanel = true;
+      paused = false;
     }
-
-    if (GuiButton(Rectangle{54, 142, 48, 20}, "Deposit Carbon"))
+    if (GuiButton(Rectangle{4, SCREEN_HEIGHT - 48 - 128, 128, 48}, "Quit"))
     {
-      pod.carbon += player.carbon;
-      player.carbon = 0;
+      ChangeState(GameState::MENU);
     }
+  }
+  else
+  {
+    // Draw UI
+    GuiPanel(Rectangle{2, 2, 128, 84}, "Status");
+    GuiLabel(Rectangle{4, 16, 128, 32},
+             TextFormat("Health: %i", player.hp));
+    GuiLabel(Rectangle{4, 32, 128, 32}, TextFormat("Carbon: %i", player.carbon));
+    GuiLabel(Rectangle{4, 48, 128, 32}, TextFormat("Ammo: %i / %i", player.ammo, player.max_ammo));
+    GuiLabel(Rectangle{4, 64, 128, 32},
+             TextFormat("Tethers: %i", player.tethers));
 
-    if (pod.showCraftingPanel)
+    if (pod.showInfoPanel)
     {
+      player.can_shoot = false;
+
+      GuiPanel(Rectangle{2, 90, 128, 74}, "Drop Pod");
+      GuiLabel(Rectangle{4, 114, 128, 14},
+               TextFormat("Shuttle Arrival: %i", pod.days_left));
+      GuiLabel(Rectangle{4, 128, 128, 14},
+               TextFormat("Stored Carbon: %i", pod.carbon));
+      // if (GuiButton(Rectangle{4, 142, 48, 20}, "Craft"))
+      // {
+      //   pod.showCraftingPanel = true;
+      // }
+
+      if (GuiButton(Rectangle{4, 142, 124, 20}, "Deposit"))
+      {
+        pod.carbon += player.carbon;
+        player.carbon = 0;
+      }
+
       int result =
           GuiWindowBox(Rectangle{2, SCREEN_HEIGHT - (SCREEN_HEIGHT / 2), 128,
                                  (SCREEN_HEIGHT / 2) - 2},
                        "Crafting");
 
-      if (TextureButton(spritesheet, 12, Rectangle{4, 252, 32, 32},
+      // Draw tether buy button
+      if (TextureButton(spritesheet, 12, Rectangle{4, 252, 124, 32},
                         "Tether\n(-10 C)"))
       {
         if (pod.carbon >= 10)
@@ -243,29 +280,38 @@ void Game::Draw()
         }
       }
 
+      // Draw ammo buy button
+      if (TextureButton(spritesheet, 14, Rectangle{4, 252 + 34, 124, 32},
+                        "Ammo x32\n(-5 C)"))
+      {
+        if (pod.carbon >= 5)
+        {
+          player.ammo += 32;
+          player.ammo = Clamp(player.ammo, 0, player.max_ammo);
+          pod.carbon -= 5;
+        }
+      }
+
+      // Draw patch kit buy button
+      if (TextureButton(spritesheet, 13, Rectangle{4, 252 + 68, 124, 32},
+                        "Med Kit\n(-20 C)"))
+      {
+        if (pod.carbon >= 20 && player.hp < player.max_hp)
+        {
+          player.hp = player.max_hp;
+          pod.carbon -= 20;
+        }
+      }
+
       if (result > 0)
       {
-        pod.showCraftingPanel = false;
+        pod.showInfoPanel = false;
       }
     }
-  }
 
-  if (GuiButton(Rectangle{SCREEN_WIDTH - 64, 0, 64, 20}, "Fill carbon"))
-  {
-    player.carbon = player.max_carbon;
-  }
-
-  if (paused)
-  {
-    DrawRectangle(0, 0, float(SCREEN_WIDTH), float(SCREEN_HEIGHT), Color{0, 0, 0, 50});
-    DrawText("PAUSED", 4, 4, 64, WHITE);
-    if (GuiButton(Rectangle{4, SCREEN_HEIGHT - 48 - 72, 128, 48}, "Resume"))
+    if (GuiButton(Rectangle{SCREEN_WIDTH - 64, 0, 64, 20}, "Fill carbon"))
     {
-      paused = false;
-    }
-    if (GuiButton(Rectangle{4, SCREEN_HEIGHT - 48 - 128, 128, 48}, "Quit"))
-    {
-      ChangeState(GameState::MENU);
+      player.carbon = player.max_carbon;
     }
   }
 }

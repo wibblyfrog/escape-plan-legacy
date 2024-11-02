@@ -25,5 +25,7 @@ enum GameState
   GAME_WON
 };
 
+extern Camera2D *game_camera;
+void SetPlayerCanShoot(bool can_shoot);
 void ChangeState(enum GameState new_state);
-void SpawnBullet(Vector2 position, float angle);
+void SpawnBullet(Vector2 position, Vector2 dir, float angle);

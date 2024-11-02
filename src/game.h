@@ -14,6 +14,7 @@ struct Bullet
   Vector2 pos;
   Vector2 dir;
   float angle;
+  float lifetime = 1.0;
 };
 
 struct Game
@@ -29,7 +30,7 @@ struct Game
   std::vector<Tether> tethers;
   bool paused = false;
 
-  void SpawnBullet(Vector2 pos, float angle);
+  void SpawnBullet(Vector2 pos, Vector2 dir, float angle);
 
   void Load();
   void Update(float dt);

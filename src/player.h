@@ -25,6 +25,13 @@ struct Player
   float break_timer;
   float break_time = 0.2;
 
+  bool can_shoot = false;
+  int ammo = 32;
+  int max_ammo = 256;
+
+  float fire_timer;
+  float fire_time = 0.1;
+
   int selected_item = 0;
 
   void Update(World *world, float dt);
