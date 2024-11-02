@@ -6,6 +6,6 @@
 struct Tether
 {
   Vector2 pos;
-  float range = 80;
+  float range = 128;
   bool is_connected = false;
 };

@@ -12,8 +12,8 @@ struct Player
   float speed = 25;
   int hp = 5;
   int max_hp = 5;
-  float timer = 10;
-  float timer_max = 10;
+  float timer = 5;
+  float timer_max = 5;
 
   int carbon = 0;
   int max_carbon = 50;
@@ -32,8 +32,10 @@ struct Player
   float fire_timer;
   float fire_time = 0.1;
 
-  int selected_item = 0;
+  float damage_timer;
+  float damage_time = 1.0;
 
   void Update(World *world, float dt);
   void Draw(Texture2D spritesheet);
+  void Damage(int amount);
 };

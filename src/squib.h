@@ -6,7 +6,7 @@
 struct Squib
 {
   Vector2 pos;
-  int health = 3;
+  int health = 6;
   int damage = 1;
   float timer = 0.0f;
 

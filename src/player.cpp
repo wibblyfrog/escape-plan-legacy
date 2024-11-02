@@ -22,6 +22,11 @@ void Player::Update(World *world, float dt)
   }
   timer = Clamp(timer, 0, timer_max);
 
+  if (damage_timer > 0)
+  {
+    damage_timer -= dt;
+  }
+
   if (IsKeyDown(KEY_W) && !world->IsSolid(pos.x, pos.y - 1) &&
       !world->IsSolid(pos.x + 7, pos.y - 1))
     pos.y -= 1;
@@ -58,4 +63,13 @@ void Player::Update(World *world, float dt)
 void Player::Draw(Texture2D spritesheet)
 {
   DrawSprite(spritesheet, 0, pos, 1.0);
+}
+
+void Player::Damage(int amount)
+{
+  if (damage_timer <= 0)
+  {
+    hp -= 1;
+    damage_timer = damage_time;
+  }
 }

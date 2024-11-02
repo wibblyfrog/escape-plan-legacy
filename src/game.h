@@ -34,6 +34,9 @@ struct Game
   Vector2 pickup_pos;
   bool paused = false;
 
+  float squib_spawn_timer;
+  float squib_spawn_time = 60;
+
   void SpawnBullet(Vector2 pos, Vector2 dir, float angle);
 
   void Load();

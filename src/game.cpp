@@ -28,13 +28,6 @@ void Game::Load()
 
   tethers.push_back(Tether(Vector2{pod.pos.x + 12, pod.pos.y + 4}));
   tethers.back().is_connected = true;
-
-  for (int i = 0; i < 50; i++)
-  {
-    Vector2 pos = Vector2{
-        float(GetRandomValue(0, WORLD_WIDTH * CELL_SIZE)), float(GetRandomValue(0, WORLD_HEIGHT * CELL_SIZE))};
-    squibs.push_back(Squib(pos));
-  }
 }
 
 void Game::Update(float dt)
@@ -49,6 +42,29 @@ void Game::Update(float dt)
     ui_camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
     player.Update(&world, dt);
     player.can_shoot = true;
+
+    if (squib_spawn_timer > 0)
+    {
+      squib_spawn_timer -= dt;
+    }
+    else
+    {
+      squib_spawn_timer = squib_spawn_time;
+      int spawn_amount = GetRandomValue(10, 200);
+      int spawn_range = (256, 1000);
+      for (int i = 0; i < spawn_amount; i++)
+      {
+        Vector2 pos = Vector2{
+            float(GetRandomValue(-(WORLD_WIDTH * CELL_SIZE), (WORLD_WIDTH * 2) * CELL_SIZE)), float(GetRandomValue(-(WORLD_HEIGHT * CELL_SIZE), (WORLD_HEIGHT * 2) * CELL_SIZE))};
+        while (Vector2Distance(player.pos, pos) <= spawn_range)
+        {
+          pos = Vector2{
+              float(GetRandomValue(0, WORLD_WIDTH * CELL_SIZE)), float(GetRandomValue(0, WORLD_HEIGHT * CELL_SIZE))};
+        }
+
+        squibs.push_back(Squib(pos));
+      }
+    }
 
     // Check item collision with player
     for (auto it = world.items.begin(); it != world.items.end();)
@@ -144,12 +160,13 @@ void Game::Update(float dt)
     // Update squibs
     for (auto squib = squibs.begin(); squib != squibs.end();)
     {
-      // if (Vector2Distance((*squib).pos, player.pos) < 128)
-      // {
       Vector2 dir = Vector2Normalize(Vector2Subtract(player.pos, (*squib).pos));
       (*squib).pos.x += dir.x * 10 * dt;
       (*squib).pos.y += dir.y * 10 * dt;
-      // }
+      if (CheckCollisionCircles(Vector2{player.pos.x + 4, player.pos.y + 4}, 3, Vector2{(*squib).pos.x + 8, (*squib).pos.y + 8}, 8))
+      {
+        player.Damage(1);
+      }
 
       if ((*squib).health <= 0)
         (*squib).alive = false;
