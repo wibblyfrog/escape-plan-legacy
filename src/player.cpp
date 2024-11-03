@@ -15,6 +15,7 @@ void Player::Update(World *world, float dt)
   {
     hp -= 1;
     timer = timer_max;
+    PlaySound(hurt);
   }
   else if (connected_to_tether)
   {
@@ -56,8 +57,10 @@ void Player::Update(World *world, float dt)
       SpawnBullet(Vector2{pos.x + 4, pos.y + 4}, dir, a + 0.1);
       ammo -= 1;
       fire_timer = fire_time;
+      PlaySound(shoot);
     }
   }
+  // hp = max_hp;
 }
 
 void Player::Draw(Texture2D spritesheet)
@@ -71,5 +74,6 @@ void Player::Damage(int amount)
   {
     hp -= 1;
     damage_timer = damage_time;
+    PlaySound(hurt);
   }
 }

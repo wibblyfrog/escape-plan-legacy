@@ -9,12 +9,22 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-enum GameState state = GameState::GAME;
+enum GameState state = GameState::MENU;
 Menu menu;
 Game game;
 GameOver game_over;
 GameWon game_won;
 Camera2D *game_camera;
+
+Sound squib_hurt;
+Sound squib_die;
+Sound o2_alarm;
+Sound shoot;
+Sound hurt;
+Sound craft;
+Sound break_rock;
+Sound deposit;
+Music bg_music;
 
 void SetPlayerCanShoot(bool can_shoot)
 {
@@ -48,15 +58,19 @@ void ChangeState(enum GameState new_state)
   switch (state)
   {
   case MENU:
+    menu = Menu();
     menu.Load();
     break;
   case GAME:
+    game = Game();
     game.Load();
     break;
   case GAME_OVER:
+    game_over = GameOver();
     game_over.Load();
     break;
   case GAME_WON:
+    game_won = GameWon();
     game_won.Load();
     break;
   }
@@ -104,10 +118,31 @@ static void UpdateDrawFrame()
 int main(void)
 {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Escape Plan");
-  // GuiLoadStyle("resources/styles/amber/style_amber.rgs");
+  // GuiLoadStyle("resources/escape.rgs");
+  InitAudioDevice();
   SetTraceLogLevel(LOG_ALL);
 
-  // Load();
+  squib_hurt = LoadSound("resources/audio/squib.ogg");
+  SetSoundVolume(squib_hurt, 0.1);
+  squib_die = LoadSound("resources/audio/squib_die.ogg");
+  SetSoundVolume(squib_die, 0.1);
+  shoot = LoadSound("resources/audio/shoot.ogg");
+  SetSoundVolume(shoot, 0.2);
+  o2_alarm = LoadSound("resources/audio/o2_alarm.ogg");
+  SetSoundVolume(o2_alarm, 0.4);
+  hurt = LoadSound("resources/audio/hurt.ogg");
+  SetSoundVolume(hurt, 0.4);
+  craft = LoadSound("resources/audio/craft.ogg");
+  SetSoundVolume(craft, 0.2);
+  break_rock = LoadSound("resources/audio/break_rock.ogg");
+  SetSoundVolume(break_rock, 0.2);
+  deposit = LoadSound("resources/audio/deposit.ogg");
+  SetSoundVolume(deposit, 0.2);
+
+  bg_music = LoadMusicStream("resources/audio/bg_music.ogg");
+  SetMusicVolume(bg_music, 0.1);
+  PlayMusicStream(bg_music);
+
   switch (state)
   {
   case MENU:
@@ -149,6 +184,11 @@ int main(void)
     game_won.Unload();
     break;
   }
+  UnloadSound(squib_hurt);
+  UnloadSound(squib_die);
+  UnloadSound(shoot);
+  UnloadSound(hurt);
+  UnloadSound(o2_alarm);
   CloseWindow();
   return 0;
 }

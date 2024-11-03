@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "raygui.h"
 #include "utils.h"
 
 struct GameWon

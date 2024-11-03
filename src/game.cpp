@@ -8,6 +8,7 @@ void Game::SpawnBullet(Vector2 pos, Vector2 dir, float angle)
 
 void Game::Load()
 {
+  // PlayMusicStream(bg_music);
   camera = Camera2D{};
   camera.offset = Vector2{GAME_WIDTH / 2, GAME_HEIGHT / 2};
   game_camera = &camera;
@@ -28,21 +29,44 @@ void Game::Load()
 
   tethers.push_back(Tether(Vector2{pod.pos.x + 12, pod.pos.y + 4}));
   tethers.back().is_connected = true;
+
+  // Add Shuttle flag
+  Vector2 end_pos = Vector2{
+      float(GetRandomValue(1, WORLD_WIDTH - 2)),
+      float(GetRandomValue(1, WORLD_HEIGHT - 2))};
+
+  if (world.GetTile(end_pos.x, end_pos.y)->isRock)
+  {
+    world.SetTile(end_pos.x, end_pos.y, Tile(5, false, 0, false));
+  }
+  pickup_pos = Vector2{
+      float(int(end_pos.x) * CELL_SIZE),
+      float(int(end_pos.y) * CELL_SIZE),
+  };
+  TraceLog(LOG_DEBUG, TextFormat("Pickup Pos - x: %i y: %i", int(pickup_pos.x / CELL_SIZE), int(pickup_pos.y / CELL_SIZE)));
 }
 
 void Game::Update(float dt)
 {
+  UpdateMusicStream(bg_music);
   if (IsKeyPressed(KEY_ESCAPE))
     paused = !paused;
   if (!paused)
   {
     //* Maintain vertical size
     camera.offset = Vector2{(SCREEN_WIDTH / 2), (SCREEN_HEIGHT / 2)};
-    camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
+    camera.zoom = (float(SCREEN_HEIGHT) / float(GAME_HEIGHT));
     ui_camera.zoom = float(SCREEN_HEIGHT) / float(GAME_HEIGHT);
     player.Update(&world, dt);
     player.can_shoot = true;
 
+    // Shuttle countdown timer
+    if (start_pickup == true)
+    {
+      pickup_timer -= dt;
+    }
+
+    //* Spawn Squibs
     if (squib_spawn_timer > 0)
     {
       squib_spawn_timer -= dt;
@@ -50,8 +74,8 @@ void Game::Update(float dt)
     else
     {
       squib_spawn_timer = squib_spawn_time;
-      int spawn_amount = GetRandomValue(10, 200);
-      int spawn_range = (256, 1000);
+      int spawn_amount = GetRandomValue(squib_spawn_amount.x, squib_spawn_amount.y);
+      int spawn_range = GetRandomValue(squib_spawn_range.x, squib_spawn_range.y);
       for (int i = 0; i < spawn_amount; i++)
       {
         Vector2 pos = Vector2{
@@ -117,6 +141,7 @@ void Game::Update(float dt)
       {
         world.DamageTile(mouse_world_pos.x, mouse_world_pos.y, 1);
         player.break_timer = player.break_time;
+        PlaySound(break_rock);
       }
     }
 
@@ -146,7 +171,7 @@ void Game::Update(float dt)
     for (auto tether : tethers)
     {
       if (CheckCollisionPointCircle(Vector2{player.pos.x + 4, player.pos.y + 4},
-                                    tether.pos, tether.range))
+                                    Vector2{tether.pos.x, tether.pos.y}, tether.range))
       {
         player.connected_to_tether = true;
       }
@@ -161,8 +186,8 @@ void Game::Update(float dt)
     for (auto squib = squibs.begin(); squib != squibs.end();)
     {
       Vector2 dir = Vector2Normalize(Vector2Subtract(player.pos, (*squib).pos));
-      (*squib).pos.x += dir.x * 10 * dt;
-      (*squib).pos.y += dir.y * 10 * dt;
+      (*squib).pos.x += dir.x * 15 * dt;
+      (*squib).pos.y += dir.y * 15 * dt;
       if (CheckCollisionCircles(Vector2{player.pos.x + 4, player.pos.y + 4}, 3, Vector2{(*squib).pos.x + 8, (*squib).pos.y + 8}, 8))
       {
         player.Damage(1);
@@ -173,6 +198,7 @@ void Game::Update(float dt)
 
       if (!(*squib).alive)
       {
+        PlaySound(squib_die);
         squib = squibs.erase(squib);
       }
       else
@@ -210,10 +236,32 @@ void Game::Update(float dt)
     {
       if (CheckCollisionCircles(Vector2{bullet.pos.x + 4, bullet.pos.y + 4}, 2, Vector2{squib.pos.x + 8, squib.pos.y + 8}, 8))
       {
+        PlaySound(squib_hurt);
         squib.health -= 1;
         bullet.alive = false;
       }
     }
+  }
+
+  // Active shuttle pickup
+  if (CheckCollisionPointCircle(player.pos, Vector2{pickup_pos.x + 4, pickup_pos.y + 12}, 64))
+  {
+    player.near_pickup = true;
+    if (!start_pickup && IsKeyPressed(KEY_SPACE) && player.carbon == 50)
+    {
+      start_pickup = true;
+      player.carbon -= 50;
+      squib_spawn_time = 5;
+      squib_spawn_range = Vector2{100, 300};
+      squib_spawn_amount = Vector2{50, 200};
+    }
+
+    if (start_pickup && pickup_timer <= 0 && CheckCollisionPointRec(Vector2{player.pos.x + 4, player.pos.y + 4}, Rectangle{pickup_pos.x + 24 - 16, pickup_pos.y + 12 - 28, 32, 32}))
+      ChangeState(GameState::GAME_WON);
+  }
+  else
+  {
+    player.near_pickup = false;
   }
 }
 
@@ -224,17 +272,16 @@ void Game::Draw()
   world.DrawMap(spritesheet, Rectangle{camera.target.x - (GAME_WIDTH / 2),
                                        camera.target.y - (GAME_HEIGHT / 2),
                                        GAME_WIDTH, GAME_HEIGHT});
-  // Draw Player shadow
-  DrawCircleV(Vector2Add(player.pos, Vector2{4, 7}), 3, Color{15, 15, 15, 100});
 
+  // Draw Tethers
   for (int i = 0; i < tethers.size(); i++)
   {
     Tether &tether = tethers[i];
 
-    if (CheckCollisionPointCircle(player.pos, tether.pos, tether.range))
+    if (CheckCollisionPointCircle(Vector2{player.pos.x + 4, player.pos.y + 4}, tether.pos, tether.range))
     {
       DrawLineEx(tether.pos, Vector2{player.pos.x + 4, player.pos.y + 4}, 1.0f,
-                 BLUE);
+                 TETHER_COLOR);
     }
 
     for (int i = 1; i < tethers.size(); i++)
@@ -242,11 +289,60 @@ void Game::Draw()
       Tether &prev = tethers[i - 1];
       if (CheckCollisionPointCircle(prev.pos, tether.pos, tether.range))
       {
-        DrawLineEx(tether.pos, prev.pos, 2.0f, BLUE);
+        DrawLineEx(tether.pos, prev.pos, 2.0f, TETHER_COLOR);
       }
     }
     DrawSprite(spritesheet, 12, tether.pos.x - 4, tether.pos.y - 4, 1.0f,
                WHITE);
+    // DrawCircleLinesV(Vector2{tether.pos.x, tether.pos.y}, tether.range, TETHER_COLOR);
+  }
+
+  // Droppod drawing routines
+  pod.Draw(spritesheet);
+
+  // Draw Droppod flag
+  DrawSprite(
+      spritesheet,
+      16,
+      pickup_pos.x, pickup_pos.y - 8,
+      1.0f, WHITE);
+  DrawSprite(
+      spritesheet,
+      24,
+      pickup_pos.x, pickup_pos.y,
+      1.0f, WHITE);
+
+  // Draw Pickup pod
+  DrawTexturePro(
+      spritesheet,
+      Rectangle{8, 16, 32, 32},
+      Rectangle{
+          pickup_pos.x + 24, pickup_pos.y + 12,
+          32, 32},
+      Vector2{16, 28},
+      0.0f, WHITE);
+
+  DrawCircleLinesV(Vector2{pickup_pos.x + 4, pickup_pos.y + 12}, 64, BLUE);
+
+  if (player.near_pickup && !start_pickup)
+  {
+    Vector2 size = MeasureTextEx(GetFontDefault(), "Call for pickup (-50 c)", 12, 1.0);
+    DrawText(
+        "Call for pickup (-50 c)",
+        pickup_pos.x - (size.x / 2),
+        pickup_pos.y + size.y,
+        12,
+        WHITE);
+  }
+  else if (start_pickup)
+  {
+    Vector2 size = MeasureTextEx(GetFontDefault(), TextFormat("Pickup Inbound %.0f", pickup_timer), 12, 1.0);
+    DrawText(
+        TextFormat("Pickup Inbound %.0f", pickup_timer),
+        pickup_pos.x - (size.x / 2),
+        pickup_pos.y + size.y,
+        12,
+        WHITE);
   }
 
   // Draw Squibs
@@ -257,9 +353,6 @@ void Game::Draw()
 
   // Draw Player
   player.Draw(spritesheet);
-
-  // Droppod drawing routines
-  pod.Draw(spritesheet);
 
   // Draw bullets
   for (auto bullet : bullets)
@@ -287,6 +380,16 @@ void Game::Draw()
       Rectangle{player.pos.x + 4, player.pos.y + 4, CELL_SIZE, CELL_SIZE},
       Vector2{4, 4},
       angle,
+      WHITE);
+
+  // Draw flag indicator
+  Vector2 dir = Vector2Normalize(Vector2Subtract(Vector2{pickup_pos.x + 4, pickup_pos.y + 12}, Vector2{player.pos.x + 4, player.pos.y + 4}));
+  DrawSprite(
+      spritesheet,
+      32,
+      (player.pos.x + 4) + (dir.x * 10),
+      (player.pos.y + 4) + (dir.y * 10),
+      1.0f,
       WHITE);
   EndMode2D();
 
@@ -319,16 +422,15 @@ void Game::Draw()
     {
       player.can_shoot = false;
 
-      GuiPanel(Rectangle{2, 90, 128, 74}, "Drop Pod");
+      GuiPanel(Rectangle{2, 90, 128, 62}, "Drop Pod");
       GuiLabel(Rectangle{4, 114, 128, 14},
-               TextFormat("Shuttle Arrival: %i", pod.days_left));
-      GuiLabel(Rectangle{4, 128, 128, 14},
                TextFormat("Stored Carbon: %i", pod.carbon));
 
-      if (GuiButton(Rectangle{4, 142, 124, 20}, "Deposit"))
+      if (GuiButton(Rectangle{4, 128, 124, 20}, "Deposit"))
       {
         pod.carbon += player.carbon;
         player.carbon = 0;
+        PlaySound(deposit);
       }
 
       int result =
@@ -344,6 +446,7 @@ void Game::Draw()
         {
           pod.carbon -= 10;
           player.tethers += 1;
+          PlaySound(craft);
         }
       }
 
@@ -356,6 +459,7 @@ void Game::Draw()
           player.ammo += 32;
           player.ammo = Clamp(player.ammo, 0, player.max_ammo);
           pod.carbon -= 5;
+          PlaySound(craft);
         }
       }
 
@@ -367,6 +471,7 @@ void Game::Draw()
         {
           player.hp = player.max_hp;
           pod.carbon -= 20;
+          PlaySound(craft);
         }
       }
 
@@ -374,11 +479,6 @@ void Game::Draw()
       {
         pod.showInfoPanel = false;
       }
-    }
-
-    if (GuiButton(Rectangle{SCREEN_WIDTH - 64, 0, 64, 20}, "Fill carbon"))
-    {
-      player.carbon = player.max_carbon;
     }
   }
 }

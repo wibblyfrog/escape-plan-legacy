@@ -10,18 +10,18 @@ void GameOver::Draw()
 
   if (GuiButton(Rectangle{
                     SCREEN_WIDTH / 2 - 64,
-                    SCREEN_HEIGHT / 2 - 24,
+                    SCREEN_HEIGHT / 2 - 52,
                     128,
-                    48},
+                    24},
                 "Try Again?"))
   {
     ChangeState(GameState::GAME);
   }
   if (GuiButton(Rectangle{
                     SCREEN_WIDTH / 2 - 64,
-                    SCREEN_HEIGHT / 2 - 52,
+                    SCREEN_HEIGHT / 2 - 24,
                     128,
-                    48},
+                    24},
                 "Quit"))
   {
     ChangeState(GameState::MENU);

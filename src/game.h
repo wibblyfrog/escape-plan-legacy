@@ -33,9 +33,15 @@ struct Game
   std::vector<Squib> squibs;
   Vector2 pickup_pos;
   bool paused = false;
+  bool draw_tutorial = true;
+
+  bool start_pickup = false;
+  float pickup_timer = 120;
 
   float squib_spawn_timer;
-  float squib_spawn_time = 60;
+  float squib_spawn_time = 30;
+  Vector2 squib_spawn_range = Vector2{100, 500};
+  Vector2 squib_spawn_amount = Vector2{10, 100};
 
   void SpawnBullet(Vector2 pos, Vector2 dir, float angle);
 
