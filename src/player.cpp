@@ -13,9 +13,8 @@ void Player::Update(World *world, float dt)
   }
   else if (connected_to_tether == false && timer <= 0)
   {
-    hp -= 1;
+    Damage(1);
     timer = timer_max;
-    PlaySound(hurt);
   }
   else if (connected_to_tether)
   {

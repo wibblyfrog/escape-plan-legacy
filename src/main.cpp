@@ -118,7 +118,7 @@ static void UpdateDrawFrame()
 int main(void)
 {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Escape Plan");
-  // GuiLoadStyle("resources/escape.rgs");
+  GuiLoadStyle("resources/dark/style_dark.rgs");
   InitAudioDevice();
   SetTraceLogLevel(LOG_ALL);
 

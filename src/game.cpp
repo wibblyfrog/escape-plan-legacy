@@ -410,7 +410,7 @@ void Game::Draw()
   else
   {
     // Draw UI
-    GuiPanel(Rectangle{2, 2, 128, 84}, "Status");
+    GuiPanel(Rectangle{2, 2, 128, 86}, "Status");
     GuiLabel(Rectangle{4, 16, 128, 32},
              TextFormat("Health: %i", player.hp));
     GuiLabel(Rectangle{4, 32, 128, 32}, TextFormat("Carbon: %i", player.carbon));

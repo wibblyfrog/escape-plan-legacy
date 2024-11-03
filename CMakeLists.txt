@@ -17,12 +17,13 @@ include(FetchContent)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Dependencies
-set(RAYLIB_VERSION 5.0)
+set(RAYLIB_VERSION 5.5)
 
 FetchContent_Declare(
     raylib
-    DOWNLOAD_EXTRACT_TIMESTAMP OFF
-    URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
+    # DOWNLOAD_EXTRACT_TIMESTAMP OFF
+    # URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
+    GIT_REPOSITORY "https://github.com/raysan5/raylib.git"
     FIND_PACKAGE_ARGS
 )
 
@@ -59,7 +60,7 @@ target_link_libraries(${PROJECT_NAME} raylib)
 if ("${PLATFORM}" STREQUAL "Web")
     # Tell Emscripten to build an example.html file.
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
-    target_link_options(${PROJECT_NAME} PUBLIC -sTOTAL_MEMORY=134217728 -sUSE_GLFW=3 PUBLIC --preload-file resources --use-preload-plugins --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/src/minshell.html)
+    target_link_options(${PROJECT_NAME} PUBLIC -g -sTOTAL_MEMORY=134217728 -sUSE_GLFW=3 PUBLIC --preload-file resources --use-preload-plugins --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/src/minshell.html)
 endif()
 
 # Checks if OSX and links appropriate frameworks (Only required on MacOS)

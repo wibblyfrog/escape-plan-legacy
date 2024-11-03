@@ -17,7 +17,7 @@ void Menu::Draw()
            8, 64,
            20,
            WHITE);
-  if (GuiButton(Rectangle{8, 280, 128, 48}, "Start Game"))
+  if (GuiButton(Rectangle{0, SCREEN_HEIGHT - 48, 128, 48}, "Start Game"))
   {
     ChangeState(GameState::GAME);
   }

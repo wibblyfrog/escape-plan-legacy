@@ -1,7 +1,5 @@
 ## Escape Plan
 
-![$(Game Title)](screenshots/screenshot000.png "Escape Plan")
-
 ### Description
 
 After crash landing on a desolate planet, you must rush to gather supplies and make your way to the escape shuttle pickup. Create a network of interconnected oxygen tethers, fight alien bugs, and weather the storms to make it out alive.
@@ -13,10 +11,6 @@ Keyboard:
 - SPACE to place a tether
 - LEFT CLICK to shoot
 - Hold RIGHT CLICK to break rocks
-
-### Screenshots
-
-_TODO: Show your game to the world, animated GIFs recommended!._
 
 ### Links
 
