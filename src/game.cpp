@@ -76,6 +76,12 @@ void Game::Update(float dt)
       squib_spawn_timer = squib_spawn_time;
       int spawn_amount = GetRandomValue(squib_spawn_amount.x, squib_spawn_amount.y);
       int spawn_range = GetRandomValue(squib_spawn_range.x, squib_spawn_range.y);
+
+      if (squibs.size() + spawn_amount > max_squibs)
+      {
+        spawn_amount = squibs.size() - spawn_amount;
+      }
+
       for (int i = 0; i < spawn_amount; i++)
       {
         Vector2 pos = Vector2{
@@ -118,7 +124,8 @@ void Game::Update(float dt)
             Rectangle{player.pos.x, player.pos.y, CELL_SIZE, CELL_SIZE},
             Rectangle{pod.pos.x - 4, pod.pos.y - 4, 36, 22}))
     {
-      pod.showInfoPanel = true;
+      if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+        pod.showInfoPanel = true;
     }
     else
     {
@@ -188,7 +195,7 @@ void Game::Update(float dt)
       Vector2 dir = Vector2Normalize(Vector2Subtract(player.pos, (*squib).pos));
       (*squib).pos.x += dir.x * 15 * dt;
       (*squib).pos.y += dir.y * 15 * dt;
-      if (CheckCollisionCircles(Vector2{player.pos.x + 4, player.pos.y + 4}, 3, Vector2{(*squib).pos.x + 8, (*squib).pos.y + 8}, 8))
+      if (CheckCollisionCircles(Vector2{player.pos.x + 4, player.pos.y + 4}, 3, Vector2{(*squib).pos.x + 8, (*squib).pos.y + 8}, 4))
       {
         player.Damage(1);
       }
@@ -252,6 +259,8 @@ void Game::Update(float dt)
       start_pickup = true;
       player.carbon -= 50;
       squib_spawn_time = 5;
+      squib_spawn_timer = 0;
+      max_squibs = 200;
       squib_spawn_range = Vector2{100, 300};
       squib_spawn_amount = Vector2{50, 200};
     }

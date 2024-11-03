@@ -38,10 +38,12 @@ struct Game
   bool start_pickup = false;
   float pickup_timer = 120;
 
+  int max_squibs = 10;
+
   float squib_spawn_timer;
-  float squib_spawn_time = 30;
+  float squib_spawn_time = 45;
   Vector2 squib_spawn_range = Vector2{100, 500};
-  Vector2 squib_spawn_amount = Vector2{10, 100};
+  Vector2 squib_spawn_amount = Vector2{5, 20};
 
   void SpawnBullet(Vector2 pos, Vector2 dir, float angle);
 
