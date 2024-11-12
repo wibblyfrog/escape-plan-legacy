@@ -1,37 +1,14 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "(gdb) Launch",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/${workspaceFolderBasename}/${workspaceFolderBasename}.exe",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${fileDirname}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "miDebuggerPath": "C:\\Apps\\w64devkit\\bin\\gdb.exe",
-      "setupCommands": [
+    "version": "0.2.0",
+    "configurations": [
         {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        },
-        {
-          "description": "Set Disassembly Flavor to Intel",
-          "text": "-gdb-set disassembly-flavor intel",
-          "ignoreFailures": true
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "name": "Debug",
+            "program": "${workspaceFolder}/build/debug/${workspaceFolderBasename}.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}"
         }
-      ],
-      "preLaunchTask": "rebuild"
-    },
-    {
-      "type": "chrome",
-      "name": "Web Debug",
-      "request": "launch",
-      "url": "http://127.0.0.1:5500/build/${workspaceFolderBasename}/${workspaceFolderBasename}.html"
-    }
-  ]
+    ]
 }

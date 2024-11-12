@@ -1,0 +1,13 @@
+{
+  "window": {
+    "width": 1280,
+    "height": 720,
+    "fullscreen": false
+  },
+  "keys": {
+    "move_up": 87,
+    "move_down": 83,
+    "move_left": 65,
+    "move_right": 68
+  }
+}

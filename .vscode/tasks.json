@@ -2,34 +2,15 @@
   "tasks": [
     {
       "type": "shell",
-      "label": "rebuild",
-      "command": "cmake --build build",
+      "label": "build",
+      "command": "make win_debug NAME=${workspaceFolderBasename} ASSETS_PATH=${workspaceFolder}/assets",
       "args": [],
+      "cwd": "${workspaceFolder}",
       "problemMatcher": [],
       "group": {
         "kind": "build",
         "isDefault": true
       }
-    },
-    {
-      "type": "shell",
-      "label": "make desktop",
-      "command": "cmake -S . -B build -G \"MinGW Makefiles\"",
-      "args": [],
-      "problemMatcher": [],
-      "group": "build"
-    },
-    {
-      "type": "shell",
-      "label": "make web files",
-      "command": "emcmake cmake -S . -B build",
-      "args": [
-        "-G \"MinGW Makefiles\"",
-        "-DPLATFORM=Web",
-        "-DCMAKE_TOOLCHAIN_FILE=C:/Apps/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
-      ],
-      "problemMatcher": [],
-      "group": "build"
     }
   ],
   "version": "2.0.0"
