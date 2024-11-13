@@ -10,6 +10,7 @@ Sprite :: struct {
 	origin:  rl.Vector2,
 	angle:   f32,
 	flip_h:  f32,
+	flip_v:  f32,
 	tint:    rl.Color,
 	y_sort:  rl.Vector2,
 }
@@ -36,6 +37,7 @@ make_sprite :: proc(
 		origin = set_origin,
 		angle = 0.0,
 		flip_h = 1,
+		flip_v = 1,
 		tint = rl.WHITE,
 		y_sort = set_ysort,
 	}
@@ -57,6 +59,7 @@ make_asprite :: proc(
 		origin = set_origin,
 		angle = 0.0,
 		flip_h = 1,
+		flip_v = 1,
 		tint = rl.WHITE,
 		y_sort = set_ysort,
 		cell_size = set_cell_size,
@@ -69,7 +72,14 @@ make_asprite :: proc(
 
 draw_sprite :: proc(sprite: Sprite) {
 	using sprite
-	rl.DrawTexturePro(get_texture(texture), {src.x, src.y, src.width * flip_h, src.height}, dest, origin, angle, tint)
+	rl.DrawTexturePro(
+		get_texture(texture),
+		{src.x, src.y, src.width * flip_h, src.height * flip_v},
+		dest,
+		origin,
+		angle,
+		tint,
+	)
 }
 
 draw_sprites_ysort :: proc(region: rl.Rectangle, sprites: []Sprite) {

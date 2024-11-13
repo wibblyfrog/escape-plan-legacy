@@ -11,6 +11,18 @@
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "type": "shell",
+      "label": "build release",
+      "command": "make win_release NAME=${workspaceFolderBasename} ASSETS_PATH=assets",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ],
   "version": "2.0.0"

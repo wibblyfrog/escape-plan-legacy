@@ -28,7 +28,7 @@ make_world :: proc() -> World {
 	w.player = make_player({f32(w.width / 2) * 8, f32(w.height / 2) * 8})
 
 	w.camera.offset = rl.Vector2{GAME_WIDTH / 2, GAME_HEIGHT / 2}
-	w.camera.zoom = 4
+	w.camera.zoom = 3
 	w.camera.target = w.player.pos
 
 	return w
@@ -85,10 +85,11 @@ draw_world :: proc(w: ^World) {
 	// Gather Y-Sorted sprites
 	clear_dynamic_array(&sprites)
 	append(&sprites, player.sprite)
+	append(&sprites, player.gun_sprite)
 
 	// Draw tilemap
-	for y: i32 = i32(player.pos.y / 8) - 15; y < i32(player.pos.y / 8) + 15; y += 1 {
-		for x: i32 = i32(player.pos.x / 8) - 25; x < i32(player.pos.x) / 8 + 25; x += 1 {
+	for y: i32 = i32(player.pos.y / 8) - 16; y < i32(player.pos.y / 8) + 16; y += 1 {
+		for x: i32 = i32(player.pos.x / 8) - 28; x < i32(player.pos.x) / 8 + 28; x += 1 {
 			if x < 0 || y < 0 || x >= width || y >= height {continue}
 			tile: Tile = tiles[y * width + x]
 			rl.DrawTexturePro(
@@ -115,6 +116,7 @@ draw_world :: proc(w: ^World) {
 		GAME_WIDTH,
 		GAME_HEIGHT,
 	}
+
 	draw_sprites_ysort(region, sprites[:])
 }
 

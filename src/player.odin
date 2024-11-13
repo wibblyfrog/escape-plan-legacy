@@ -10,27 +10,20 @@ PlayerConfigType :: struct {
 PlayerConfig := PlayerConfigType{}
 
 Player :: struct {
-	pos:       rl.Vector2,
-	vel:       rl.Vector2,
-	speed:     f32,
-	sprite:    AnimatedSprite,
-	inventory: map[string]i32,
+	pos:        rl.Vector2,
+	vel:        rl.Vector2,
+	speed:      f32,
+	sprite:     AnimatedSprite,
+	inventory:  map[string]i32,
+	gun_sprite: Sprite,
 }
 
 make_player :: proc(set_pos: [2]f32) -> Player {
 	return Player {
 		pos = set_pos,
 		speed = PlayerConfig.speed,
-		sprite = make_asprite(
-			"player",
-			{0, 0, 8, 8},
-			{set_pos.x, set_pos.y, 8, 8},
-			{4, 4},
-			8,
-			0.1,
-			{1, 2, 3, 4},
-			{0, 4},
-		),
+		sprite = make_asprite("player", {0, 0, 8, 8}, {set_pos.x, set_pos.y, 8, 8}, {4, 4}, 8, 0.1, {1, 2, 3}, {0, 4}),
+		gun_sprite = make_sprite("player", {8, 8, 8, 8}, {set_pos.x, set_pos.y, 8, 8}, {3, 4}, {0, 4.1}),
 	}
 }
 
@@ -63,13 +56,20 @@ update_player :: proc(p: ^Player) {
 	sprite.dest.x = pos.x
 	sprite.dest.y = pos.y
 
+	gun_sprite.dest.x = pos.x
+	gun_sprite.dest.y = pos.y
+
 	angle: f32 =
 		linalg.atan2(f32(rl.GetMouseY() - (GAME_HEIGHT / 2)), f32(rl.GetMouseX() - (GAME_WIDTH / 2))) *
 		(180.0 / linalg.PI)
 	sprite.flip_h = 1
+	gun_sprite.flip_v = 1
 	if linalg.abs(angle) > 90 {
 		sprite.flip_h = -1
+		gun_sprite.flip_v = -1
 	}
+
+	gun_sprite.angle = angle
 
 	if vel != 0 {
 		update_asprite(&sprite)
