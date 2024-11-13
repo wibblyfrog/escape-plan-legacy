@@ -47,11 +47,11 @@ change_scene :: proc(new_scene: Scene) {
 main :: proc() {
 	// load_all_configs()
 	load_settings_config()
-	rl.SetConfigFlags({.WINDOW_RESIZABLE, .VSYNC_HINT})
+	rl.SetConfigFlags({.WINDOW_RESIZABLE})
 	rl.InitWindow(SettingsConfig.window.width, SettingsConfig.window.height, NAME)
 	defer rl.CloseWindow()
 
-	rl.SetTargetFPS(60)
+	// rl.SetTargetFPS(60)
 	rl.SetTraceLogLevel(.ALL)
 
 	target := rl.LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT)

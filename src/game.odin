@@ -32,7 +32,7 @@ draw_game :: proc() {
 }
 
 draw_ui_game :: proc() {
-
+	rl.DrawFPS(0, 0)
 }
 
 unload_game :: proc() {

@@ -67,9 +67,9 @@ make_asprite :: proc(
 	}
 }
 
-draw_sprite :: proc(sprite: ^Sprite) {
+draw_sprite :: proc(sprite: Sprite) {
 	using sprite
-	rl.DrawTexturePro(get_texture(texture)^, {src.x, src.y, src.width * flip_h, src.height}, dest, origin, angle, tint)
+	rl.DrawTexturePro(get_texture(texture), {src.x, src.y, src.width * flip_h, src.height}, dest, origin, angle, tint)
 }
 
 draw_sprites_ysort :: proc(region: rl.Rectangle, sprites: []Sprite) {
@@ -79,7 +79,7 @@ draw_sprites_ysort :: proc(region: rl.Rectangle, sprites: []Sprite) {
 
 	for &sprite in sprites {
 		if rl.CheckCollisionRecs(region, sprite.dest) {
-			draw_sprite(&sprite)
+			draw_sprite(sprite)
 		}
 	}
 }

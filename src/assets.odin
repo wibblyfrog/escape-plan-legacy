@@ -10,10 +10,10 @@ AssetsType :: struct {
 }
 
 make_assets :: proc() -> AssetsType {
-	return AssetsType {	
+	return AssetsType {
 		textures = make(map[string]rl.Texture),
 		sounds = make(map[string]rl.Sound),
-		music = make(map[string]rl.Music)
+		music = make(map[string]rl.Music),
 	}
 }
 
@@ -21,8 +21,8 @@ add_texture :: proc(name: string) {
 	Assets.textures[name] = rl.LoadTexture(fmt.caprintf("%s/images/%s.png", ASSETS_PATH, name))
 }
 
-get_texture :: proc(name: string) -> ^rl.Texture {
-	return &Assets.textures[name]
+get_texture :: proc(name: string) -> rl.Texture {
+	return Assets.textures[name]
 }
 
 unload_assets :: proc() {

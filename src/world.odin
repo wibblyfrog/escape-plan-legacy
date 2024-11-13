@@ -82,31 +82,32 @@ draw_world :: proc(w: ^World) {
 	rl.BeginMode2D(camera)
 	defer rl.EndMode2D()
 
+	// Gather Y-Sorted sprites
+	clear_dynamic_array(&sprites)
+	append(&sprites, player.sprite)
+
 	// Draw tilemap
 	for y: i32 = i32(player.pos.y / 8) - 15; y < i32(player.pos.y / 8) + 15; y += 1 {
 		for x: i32 = i32(player.pos.x / 8) - 25; x < i32(player.pos.x) / 8 + 25; x += 1 {
 			if x < 0 || y < 0 || x >= width || y >= height {continue}
-			tile: ^Tile = &tiles[y * width + x]
+			tile: Tile = tiles[y * width + x]
 			rl.DrawTexturePro(
-				get_texture("world")^,
+				get_texture("world"),
 				{f32(tile.id % width) * 8, f32(tile.id / width) * 8, 8, 8},
 				{f32(x) * 8, f32(y) * 8, 8, 8},
 				{0, 0},
 				0.0,
 				rl.WHITE,
 			)
+
+			if (y * width + x) in rocks {
+				append(&sprites, rocks[y * width + x].sprite)
+			}
 		}
 	}
 
 	// Draw player shadow
 	rl.DrawEllipse(i32(player.pos.x), i32(player.pos.y + 4), 4, 2, rl.Color{0, 0, 0, 80})
-
-	// Draw Y-Sorted sprites
-	clear_dynamic_array(&sprites)
-	append(&sprites, player.sprite)
-	for key, rock in rocks {
-		append(&sprites, rock.sprite)
-	}
 
 	region: rl.Rectangle = {
 		camera.target.x - camera.offset.x,

@@ -27,7 +27,7 @@ make_player :: proc(set_pos: [2]f32) -> Player {
 			{set_pos.x, set_pos.y, 8, 8},
 			{4, 4},
 			8,
-			PlayerConfig.animation_speed,
+			0.1,
 			{1, 2, 3, 4},
 			{0, 4},
 		),
@@ -52,8 +52,13 @@ update_player :: proc(p: ^Player) {
 		// sprite.flip_h = 1
 	}
 	vel = rl.Vector2Normalize(vel)
-
-	pos += vel * speed * rl.GetFrameTime()
+	if rl.IsKeyDown(.LEFT_SHIFT) {
+		sprite.animation_speed = 0.075
+		pos += vel * (speed * 1.5) * rl.GetFrameTime()
+	} else {
+		sprite.animation_speed = 0.1
+		pos += vel * speed * rl.GetFrameTime()
+	}
 
 	sprite.dest.x = pos.x
 	sprite.dest.y = pos.y
