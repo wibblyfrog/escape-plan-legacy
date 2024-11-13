@@ -1,0 +1,52 @@
+{
+  "rocks": {
+    "carbon": {
+      "texture": "world",
+      "sprite": 8,
+      "hp": 3,
+      "stack_size": 64,
+      "drop_amount": 3,
+      "spawn_chance": 80
+    },
+    "gold": {
+      "texture": "world",
+      "sprite": 16,
+      "hp": 3,
+      "stack_size": 64,
+      "drop_amount": 5,
+      "spawn_chance": 80
+    },
+    "sulfur": {
+      "texture": "world",
+      "sprite": 24,
+      "hp": 3,
+      "stack_size": 64,
+      "drop_amount": 3,
+      "spawn_chance": 80
+    },
+    "copper": {
+      "texture": "world",
+      "sprite": 32,
+      "hp": 3,
+      "stack_size": 64,
+      "drop_amount": 3,
+      "spawn_chance": 80
+    },
+    "egg": {
+      "texture": "world",
+      "sprite": 32,
+      "hp": 3,
+      "stack_size": 16,
+      "drop_amount": 1,
+      "spawn_chance": 80
+    },
+    "pulper": {
+      "texture": "world",
+      "sprite": 48,
+      "hp": 3,
+      "stack_size": 64,
+      "drop_amount": 3,
+      "spawn_chance": 80
+    }
+  }
+}

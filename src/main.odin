@@ -45,7 +45,8 @@ change_scene :: proc(new_scene: Scene) {
 }
 
 main :: proc() {
-	load_all_configs()
+	// load_all_configs()
+	load_settings_config()
 	rl.SetConfigFlags({.WINDOW_RESIZABLE, .VSYNC_HINT})
 	rl.InitWindow(SettingsConfig.window.width, SettingsConfig.window.height, NAME)
 	defer rl.CloseWindow()
@@ -56,6 +57,7 @@ main :: proc() {
 	target := rl.LoadRenderTexture(GAME_WIDTH, GAME_HEIGHT)
 	rl.SetTextureFilter(target.texture, .POINT)
 
+	load_all_configs()
 	fmt.printfln("%b", SettingsConfig.window.fullscreen)
 
 	Assets = make_assets()

@@ -74,7 +74,7 @@ draw_sprite :: proc(sprite: ^Sprite) {
 
 draw_sprites_ysort :: proc(sprites: []Sprite) {
 	slice.sort_by(sprites, proc(a: Sprite, b: Sprite) -> bool {
-		return (a.dest.y + a.origin.y) < (b.dest.y + b.origin.y)
+		return (a.dest.y + a.y_sort.y) < (b.dest.y + b.y_sort.y)
 	})
 
 	for &sprite in sprites {
