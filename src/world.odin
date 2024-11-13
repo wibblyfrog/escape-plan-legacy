@@ -57,13 +57,13 @@ create_tilemap :: proc(w: ^World) {
 			if x == 0 || y == 0 || x == width - 1 || y == height - 1 {
 				t.id = 1
 				t.solid = true
-			}
+			} else {
 
-			// Place random rocks
-			if rl.GetRandomValue(0, 100) < 10 {
-				rocks[y * width + x] = make_rock("pulper", {x, y})
+				// Place random rocks
+				if rl.GetRandomValue(0, 100) < 10 {
+					rocks[y * width + x] = make_rock("pulper", {x, y})
+				}
 			}
-
 			append(&tiles, t)
 		}
 	}
