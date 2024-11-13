@@ -25,7 +25,7 @@ make_world :: proc() -> World {
 	}
 
 	create_tilemap(&w)
-	w.player = make_player({0, 0})
+	w.player = make_player({f32(w.width / 2) * 8, f32(w.height / 2) * 8})
 
 	w.camera.offset = rl.Vector2{GAME_WIDTH / 2, GAME_HEIGHT / 2}
 	w.camera.zoom = 4
@@ -41,12 +41,6 @@ create_tilemap :: proc(w: ^World) {
 	clear_dynamic_array(&tiles)
 	clear_map(&rocks)
 
-	// Compile rock spawn chances
-	// spawn_chances: map[string]i32
-	// for key, rock in TileConfig.rocks {
-	// 	spawn_chances[key] = rock.spawn_chance
-	// }
-
 	// Fill tilemap
 	for y: i32; y < height; y += 1 {
 		for x: i32; x < width; x += 1 {
@@ -60,8 +54,10 @@ create_tilemap :: proc(w: ^World) {
 			} else {
 
 				// Place random rocks
-				if rl.GetRandomValue(0, 100) < 10 {
-					rocks[y * width + x] = make_rock("pulper", {x, y})
+				rock_type := get_weighted_rock()
+				if rock_type != "empty" &&
+				   rl.Vector2Distance({f32(x), f32(y)}, {f32(width / 2), f32(height / 2)}) > 6 {
+					rocks[y * width + x] = make_rock(rock_type, {x, y})
 				}
 			}
 			append(&tiles, t)
@@ -87,8 +83,9 @@ draw_world :: proc(w: ^World) {
 	defer rl.EndMode2D()
 
 	// Draw tilemap
-	for y: i32; y < height; y += 1 {
-		for x: i32; x < width; x += 1 {
+	for y: i32 = i32(player.pos.y / 8) - 15; y < i32(player.pos.y / 8) + 15; y += 1 {
+		for x: i32 = i32(player.pos.x / 8) - 25; x < i32(player.pos.x) / 8 + 25; x += 1 {
+			if x < 0 || y < 0 || x >= width || y >= height {continue}
 			tile: ^Tile = &tiles[y * width + x]
 			rl.DrawTexturePro(
 				get_texture("world")^,
@@ -111,10 +108,18 @@ draw_world :: proc(w: ^World) {
 		append(&sprites, rock.sprite)
 	}
 
-	draw_sprites_ysort(sprites[:])
+	region: rl.Rectangle = {
+		camera.target.x - camera.offset.x,
+		camera.target.y - camera.offset.y,
+		GAME_WIDTH,
+		GAME_HEIGHT,
+	}
+	draw_sprites_ysort(region, sprites[:])
 }
 
 unload_world :: proc(w: ^World) {
 	using w
 	clear_dynamic_array(&sprites)
+	clear_dynamic_array(&tiles)
+	clear_map(&rocks)
 }

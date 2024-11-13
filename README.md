@@ -23,6 +23,7 @@ Keyboard:
 - [x] Asset management pipeline
 - [x] Sprite/AnimatedSprite rendering with Y-Sorting
 - [ ] Player
+
   - [x] Basic movement
   - [ ] Collisions
   - [x] Run animation
@@ -30,16 +31,17 @@ Keyboard:
   - [ ] Block breaking
   - [ ] Inventory system
   - [ ] Stamina/Oxygen/HP management
+
 - [ ] World
 
   - [ ] Tilemap
     - [x] Wall/Ground tiles
     - [ ] Collisions
-    - [ ] Culling
+    - [x] Culling
   - [ ] Rocks
 
-    - [/] Rock spawning/drawing
-      - Still need to spawn rocks according to spawn chance, need to find a good weighted randomness algo
+    - [x] Rock spawning/drawing
+      - ~Still need to spawn rocks according to spawn chance, need to find a good weighted randomness algo~
     - [ ] Item dropping when broken
 
   - [ ] Enemy spawning

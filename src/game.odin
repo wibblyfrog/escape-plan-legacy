@@ -17,6 +17,13 @@ load_game :: proc() {
 }
 
 update_game :: proc(dt: f32) {
+
+	if (rl.IsKeyPressed(.R) && DEBUG) {
+		unload_world(&world)
+		load_all_configs()
+		world = make_world()
+	}
+
 	update_world(&world)
 }
 

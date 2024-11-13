@@ -72,13 +72,15 @@ draw_sprite :: proc(sprite: ^Sprite) {
 	rl.DrawTexturePro(get_texture(texture)^, {src.x, src.y, src.width * flip_h, src.height}, dest, origin, angle, tint)
 }
 
-draw_sprites_ysort :: proc(sprites: []Sprite) {
+draw_sprites_ysort :: proc(region: rl.Rectangle, sprites: []Sprite) {
 	slice.sort_by(sprites, proc(a: Sprite, b: Sprite) -> bool {
 		return (a.dest.y + a.y_sort.y) < (b.dest.y + b.y_sort.y)
 	})
 
 	for &sprite in sprites {
-		draw_sprite(&sprite)
+		if rl.CheckCollisionRecs(region, sprite.dest) {
+			draw_sprite(&sprite)
+		}
 	}
 }
 
